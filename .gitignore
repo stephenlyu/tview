@@ -1,2 +1,8 @@
 .idea/
 *.iml
+
+moc.*
+moc_moc.h
+moc_cgo_*.go
+
+deploy/
