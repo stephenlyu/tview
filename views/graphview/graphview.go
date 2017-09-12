@@ -6,6 +6,8 @@ import (
 	"github.com/therecipe/qt/core"
 	"github.com/stephenlyu/tview/views/mainwindow"
 	"fmt"
+	"time"
+	"math/rand"
 )
 
 //go:generate qtmoc
@@ -21,10 +23,13 @@ func CreateGraphView(parent widgets.QWidget_ITF) *GraphView {
 	this.ConnectShowEvent(this.ShowEvent)
 	this.ConnectResizeEvent(this.ResizeEvent)
 
+	this.SetRenderHint(gui.QPainter__TextAntialiasing, true)
+	this.SetCacheMode(widgets.QGraphicsView__CacheBackground)
 	this.SetHorizontalScrollBarPolicy(core.Qt__ScrollBarAlwaysOff)
 	this.SetVerticalScrollBarPolicy(core.Qt__ScrollBarAlwaysOff)
-
+	this.SetAlignment(core.Qt__AlignLeft)
 	this.Scale(1, -1)
+
 	scene := widgets.NewQGraphicsScene(parent)
 	scene.SetBackgroundBrush(gui.NewQBrush4(core.Qt__black, core.Qt__SolidPattern))
 	this.SetScene(scene)
@@ -33,13 +38,23 @@ func CreateGraphView(parent widgets.QWidget_ITF) *GraphView {
 	fmt.Println(r.X(), r.Y(), r.Width(), r.Height())
 	scene.SetSceneRect2(float64(r.X()), float64(r.Y()), float64(r.X() + r.Width()), float64(r.Y() + r.Height()))
 
-	pen := gui.NewQPen()
-	pen.SetBrush(gui.NewQBrush4(core.Qt__red, core.Qt__SolidPattern))
-	this.Scene().AddLine2(0, 0, 100, 100, pen)
-
-	this.Scene().AddEllipse2(0, 0, 1, 1, pen, pen.Brush())
+	timer := core.NewQTimer(this)
+	timer.ConnectTimeout(this.addLines)
+	timer.SetSingleShot(true)
+	timer.Start(100)
 
 	return this
+}
+
+func (this *GraphView) addLines() {
+	pen := gui.NewQPen()
+	pen.SetBrush(gui.NewQBrush4(core.Qt__red, core.Qt__SolidPattern))
+	start := time.Now().UnixNano()
+	for i := 0; i < 10000; i++ {
+		this.Scene().AddLine2(float64(rand.Intn(1000)), float64(rand.Intn(1000)), float64(rand.Intn(1000)), float64(rand.Intn(1000)), pen)
+	}
+	fmt.Println("time cost: ", (time.Now().UnixNano()  - start) / int64(time.Millisecond))
+	this.Scene().Update(this.Scene().SceneRect())
 }
 
 func (this *GraphView) SetMainWindow(window *mainwindow.MainWindow) {
