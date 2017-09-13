@@ -8,12 +8,21 @@ import (
 	"fmt"
 	"time"
 	"math/rand"
+	"github.com/stephenlyu/tview/transform"
 )
 
 //go:generate qtmoc
 type GraphView struct {
 	widgets.QGraphicsView
 	MainWindow *mainwindow.MainWindow
+
+	// Coordinate transformers
+
+	ValueTransformer transform.Transformer				// 标准坐标或对数坐标
+	XScaleTransformer transform.ScaleTransformer		// X轴缩放
+	YScaleTransformer transform.ScaleTransformer		// Y轴缩放
+
+
 }
 
 func CreateGraphView(parent widgets.QWidget_ITF) *GraphView {
