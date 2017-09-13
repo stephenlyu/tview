@@ -67,14 +67,16 @@ func (this *KLineGraph) GetValueRange(startIndex int, endIndex int) (float64, fl
 		endIndex = this.Model.Count()
 	}
 
-	values := this.Model.Get(startIndex)
+	startIndex, endIndex = this.adjustIndices(startIndex, endIndex)
+
+	values := this.Model.GetRaw(startIndex)
 	util.Assert(len(values) == 4, "bad model values")
 
 	high := values[2]
 	low := values[3]
 
 	for i := startIndex + 1; i < endIndex; i++ {
-		values := this.Model.Get(0)
+		values := this.Model.GetRaw(i)
 		if values[2] > high {
 			high = values[2]
 		}
@@ -105,6 +107,16 @@ func (this *KLineGraph) updateKLine(i int, item *KLineItem) {
 	item.Update(x, w, values[0], values[1], values[2], values[3])
 }
 
+func (this *KLineGraph) adjustIndices(startIndex int, endIndex int) (int, int) {
+	if startIndex > 0 {
+		startIndex--
+	}
+	if endIndex < this.Model.Count() {
+		endIndex++
+	}
+	return startIndex, endIndex
+}
+
 // 更新当前显示的K线
 func (this *KLineGraph) Update(startIndex int, endIndex int) {
 	if startIndex < 0 {
@@ -115,8 +127,19 @@ func (this *KLineGraph) Update(startIndex int, endIndex int) {
 		endIndex = this.Model.Count()
 	}
 
+	startIndex, endIndex = this.adjustIndices(startIndex, endIndex)
+
+	// 隐藏不需要显示的K线
+	for i, item := range this.KLines {
+		if i < startIndex || i >= endIndex {
+			item.Item.Hide()
+		}
+	}
+
+	// 更新需要显示的K线
 	for i := startIndex; i < endIndex; i++ {
 		item := this.ensureItem(i)
+		item.Item.Show()
 		this.updateKLine(i, item)
 	}
 }

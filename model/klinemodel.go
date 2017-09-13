@@ -23,7 +23,7 @@ func (this *KLineModel) Count() int {
 	return len(this.data)
 }
 
-func (this *KLineModel) Get(index int) []float64 {
+func (this *KLineModel) GetRaw(index int) []float64 {
 	if index < 0 || index >= len(this.data) {
 		panic("bad model index")
 	}
@@ -42,14 +42,20 @@ func (this *KLineModel) Get(index int) []float64 {
 		low = this.valueTransformer.To(low)
 	}
 
+	return []float64{open, close, high, low}
+}
+
+func (this *KLineModel) Get(index int) []float64 {
+	values := this.GetRaw(index)
+
 	if this.scaleTransformer != nil {
-		open = this.scaleTransformer.To(open)
-		close = this.scaleTransformer.To(close)
-		high = this.scaleTransformer.To(high)
-		low = this.scaleTransformer.To(low)
+		values[0] = this.scaleTransformer.To(values[0])
+		values[1] = this.scaleTransformer.To(values[1])
+		values[2] = this.scaleTransformer.To(values[2])
+		values[3] = this.scaleTransformer.To(values[3])
 	}
 
-	return []float64{open, close, high, low}
+	return values
 }
 
 func (this *KLineModel) GetGraphTypes() []constants.GraphType {
