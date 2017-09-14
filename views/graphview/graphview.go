@@ -5,7 +5,6 @@ import (
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/core"
 	"github.com/stephenlyu/tview/views/mainwindow"
-	"fmt"
 	"github.com/stephenlyu/tview/transform"
 	"github.com/stephenlyu/tview/graphs/klinegraph"
 	"github.com/stephenlyu/tview/graphs"
@@ -15,13 +14,13 @@ import (
 
 const (
 	VISIBLE_KLINES_MIN = 16		// 最少可见K线数
-	BEST_ITEM_WIDTH = 20		// Item最佳显示宽度
+	BEST_ITEM_WIDTH = 10		// Item最佳显示宽度
 	MIN_ITEM_WIDTH = 3			// Item最小显示宽度, 1像素宽，1像素边距
 )
 
 const (
-	H_MARGIN = 0
-	V_MARGIN = 0
+	H_MARGIN = 10
+	V_MARGIN = 10
 )
 
 //go:generate qtmoc
@@ -110,9 +109,9 @@ func (this *GraphView) reset() {
 
 func (this *GraphView) SetData(data []entity.Record) {
 	this.reset()
-	this.Data = data
+	this.Data = data[:20]
 	if this.IsMainGraph {
-		klineModel := model.NewKLineModel(data)
+		klineModel := model.NewKLineModel(this.Data)
 		klineModel.SetValueTransformer(this.ValueTransformer)
 		klineModel.SetScaleTransformer(this.YScaleTransformer)
 
@@ -122,19 +121,19 @@ func (this *GraphView) SetData(data []entity.Record) {
 		this.Graphs = append(this.Graphs, klineGraph)
 	}
 
-	this.LastVisibleIndex = len(data) - 1
+	this.LastVisibleIndex = len(this.Data) - 1
 	this.ItemWidth = BEST_ITEM_WIDTH
 
 	// Do layout
-	this.layout()
+	this.Layout()
 }
 
 // UI routines
 
 func (this *GraphView) connectEvents() {
 	this.ConnectKeyPressEvent(this.KeyPressEvent)
-	this.ConnectShowEvent(this.ShowEvent)
 	this.ConnectResizeEvent(this.ResizeEvent)
+	this.ConnectWheelEvent(this.WheelEvent)
 }
 
 func (this *GraphView) init() {
@@ -163,21 +162,27 @@ func (this *GraphView) UpdateUI() {
 	yMin := this.YScaleTransformer.To(this.yMin)
 
 	width := float64(len(this.Data)) * this.ItemWidth
+	fullMode := width < float64(this.Width() - 2 * H_MARGIN)
+	if fullMode {
+		width = float64(this.Width() - 2 * H_MARGIN)
+	}
 	height := yMax
-	fmt.Println(this.Width(), this.Height(), width, this.SceneRect().X(), this.SceneRect().Y(), this.Scene().Width(), this.Scene().Height())
-	this.Scene().SetSceneRect2(0, 0, width, height)
+	this.Scene().SetSceneRect2(-H_MARGIN, -V_MARGIN, width + 2 * H_MARGIN, height + 2 * V_MARGIN)
 
 	yCenter := (yMax + yMin) / 2
-	xCenter := float64(this.LastVisibleIndex + 1) * this.ItemWidth - float64(this.Width()) / 2
-	fmt.Println(this.Width(), this.Height(), width, this.SceneRect().X(), this.SceneRect().Y(), this.Scene().Width(), this.Scene().Height(), yMax, yMin, yCenter, xCenter, float64(this.LastVisibleIndex + 1) * this.ItemWidth, float64(this.Width()) / 2)
+	var xCenter float64
+	if fullMode {
+		xCenter = float64(this.Scene().Width() - 2 * H_MARGIN) / 2
+	} else {
+		xCenter = float64(this.LastVisibleIndex + 1) * this.ItemWidth + H_MARGIN - float64(this.Width()) / 2
+	}
 
 	this.CenterOn2(xCenter, yCenter)
 
-	this.Scene().Update(core.NewQRectF())
-	fmt.Println(this.Width(), this.Height(), width, this.Scene().Width(), this.Scene().Height(), yMax, yMin, yCenter, xCenter, float64(this.LastVisibleIndex + 1) * this.ItemWidth, float64(this.Width()) / 2)
+	this.Scene().Update2(xCenter - float64(this.Width()) / 2, yMin, float64(this.Width()), float64(this.Height()))
 }
 
-func (this *GraphView) layout() {
+func (this *GraphView) Layout() {
 	if this.ItemWidth <= 0 {
 		this.ItemWidth = BEST_ITEM_WIDTH
 	}
@@ -219,7 +224,6 @@ func (this *GraphView) layout() {
 		}
 		height := float64(this.Height()) - 2 * V_MARGIN
 
-		fmt.Println("y scale:", diff / height)
 		this.YScaleTransformer.SetScale(diff / height)
 
 		this.yMax = max
@@ -236,13 +240,11 @@ func (this *GraphView) SetMainWindow(window *mainwindow.MainWindow) {
 
 // Event Handlers
 func (this *GraphView) ResizeEvent(event *gui.QResizeEvent) {
-	this.layout()
-}
-
-func (this *GraphView) ShowEvent(event *gui.QShowEvent) {
-	fmt.Println("ShowEvent")
+	this.Layout()
 }
 
 func (this *GraphView) KeyPressEvent(event *gui.QKeyEvent) {
-	fmt.Println("KeyPressEvent")
+}
+
+func (this *GraphView) WheelEvent(event *gui.QWheelEvent) {
 }
