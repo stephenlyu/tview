@@ -10,6 +10,7 @@ import (
 	"github.com/stephenlyu/tview/graphs"
 	"github.com/stephenlyu/tds/entity"
 	"github.com/stephenlyu/tview/model"
+	"fmt"
 )
 
 const (
@@ -22,6 +23,8 @@ const (
 	H_MARGIN = 10
 	V_MARGIN = 10
 )
+
+const KLINE_MODEL = "__kline__"
 
 //go:generate qtmoc
 type GraphView struct {
@@ -36,15 +39,19 @@ type GraphView struct {
 
 	// Data
 
-	Data []entity.Record
+	Data *model.Data
 
 	// Models
 
-	Models []model.Model
+	Models map[string]model.Model
+
+	// Formula creators
+
+	FormulaCreators map[string]model.FormulaCreator
 
 	// Graphs
 
-	Graphs []graphs.Graph
+	Graphs map[string]graphs.Graph
 
 	// State Variables
 
@@ -59,6 +66,9 @@ type GraphView struct {
 func CreateGraphView(isMain bool, parent widgets.QWidget_ITF) *GraphView {
 	this := NewGraphView(parent)
 	this.IsMainGraph = isMain
+	this.Models = make(map[string]model.Model)
+	this.Graphs = make(map[string]graphs.Graph)
+	this.FormulaCreators = make(map[string]model.FormulaCreator)
 	this.init()
 
 	this.ValueTransformer = transform.NewEQTransformer()
@@ -93,11 +103,11 @@ func (this *GraphView) reset() {
 	for _, graph := range this.Graphs {
 		graph.Clear()
 	}
-	this.Graphs = nil
+	this.Graphs = make(map[string]graphs.Graph)
 
 	// Clear data & models
 	this.Data = nil
-	this.Models = nil
+	this.Models = make(map[string]model.Model)
 
 	// Reset State
 	this.ItemWidth = 0
@@ -109,23 +119,37 @@ func (this *GraphView) reset() {
 
 func (this *GraphView) SetData(data []entity.Record) {
 	this.reset()
-	this.Data = data[:20]
+	this.Data = model.NewData(data)
 	if this.IsMainGraph {
 		klineModel := model.NewKLineModel(this.Data)
 		klineModel.SetValueTransformer(this.ValueTransformer)
 		klineModel.SetScaleTransformer(this.YScaleTransformer)
 
-		this.Models = append(this.Models, klineModel)
+		this.Models[KLINE_MODEL] = klineModel
 
 		klineGraph := klinegraph.NewKLineGraph(klineModel, this.Scene(), this.XScaleTransformer)
-		this.Graphs = append(this.Graphs, klineGraph)
+		this.Graphs[KLINE_MODEL] = klineGraph
 	}
 
-	this.LastVisibleIndex = len(this.Data) - 1
+
+
+	this.LastVisibleIndex = this.Data.Count() - 1
 	this.ItemWidth = BEST_ITEM_WIDTH
 
 	// Do layout
 	this.Layout()
+}
+
+func (this *GraphView) AddFormula(name string, args []float64) {
+	if !model.GlobalLibrary.CanSupport(name) {
+		return
+	}
+
+	creatorFactory := model.GlobalLibrary.GetCreatorFactory(name)
+
+	creator := creatorFactory.CreateFormulaCreator(args)
+
+	this.FormulaCreators[name] = creator
 }
 
 // UI routines
@@ -161,7 +185,7 @@ func (this *GraphView) UpdateUI() {
 	yMax := this.YScaleTransformer.To(this.yMax)
 	yMin := this.YScaleTransformer.To(this.yMin)
 
-	width := float64(len(this.Data)) * this.ItemWidth
+	width := float64(this.Data.Count()) * this.ItemWidth
 	fullMode := width < float64(this.Width() - 2 * H_MARGIN)
 	if fullMode {
 		width = float64(this.Width() - 2 * H_MARGIN)
@@ -183,6 +207,10 @@ func (this *GraphView) UpdateUI() {
 }
 
 func (this *GraphView) Layout() {
+	if this.Data == nil {
+		return
+	}
+	fmt.Println("Layout", this.Data.Count())
 	if this.ItemWidth <= 0 {
 		this.ItemWidth = BEST_ITEM_WIDTH
 	}
@@ -206,10 +234,17 @@ func (this *GraphView) Layout() {
 	// 计算Y值范围
 
 	if len(this.Graphs) > 0 {
-		min, max := this.Graphs[0].GetValueRange(this.FirstVisibleIndex, this.LastVisibleIndex + 1)
+		names := make([]string, len(this.Graphs))
+		i := 0
+		for name := range this.Graphs {
+			names[i] = name
+			i++
+		}
 
-		for i := 1; i < len(this.Graphs); i++ {
-			min1, max1 := this.Graphs[i].GetValueRange(this.FirstVisibleIndex, this.LastVisibleIndex + 1)
+		min, max := this.Graphs[names[0]].GetValueRange(this.FirstVisibleIndex, this.LastVisibleIndex + 1)
+
+		for i := 1; i < len(names); i++ {
+			min1, max1 := this.Graphs[names[i]].GetValueRange(this.FirstVisibleIndex, this.LastVisibleIndex + 1)
 			if min1 < min {
 				min = min1
 			}

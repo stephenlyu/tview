@@ -1,34 +1,29 @@
 package model
 
 import (
-	"github.com/stephenlyu/tds/entity"
-	"github.com/stephenlyu/tview/transform"
 	"github.com/stephenlyu/tview/constants"
 )
 
 type KLineModel struct {
-	data []entity.Record
+	BaseModel
 
-	valueTransformer transform.Transformer
-	scaleTransformer transform.ScaleTransformer
-
-	listeners []ModelListener
+	data *Data
 }
 
-func NewKLineModel(data []entity.Record) *KLineModel {
+func NewKLineModel(data *Data) *KLineModel {
 	return &KLineModel{data: data}
 }
 
 func (this *KLineModel) Count() int {
-	return len(this.data)
+	return this.data.Count()
 }
 
 func (this *KLineModel) GetRaw(index int) []float64 {
-	if index < 0 || index >= len(this.data) {
+	if index < 0 || index >= this.data.Count() {
 		panic("bad model index")
 	}
 
-	r := &this.data[index]
+	r := this.data.Get(index)
 
 	open := float64(r.GetOpen())
 	close := float64(r.GetClose())
@@ -60,42 +55,4 @@ func (this *KLineModel) Get(index int) []float64 {
 
 func (this *KLineModel) GetGraphTypes() []constants.GraphType {
 	return []constants.GraphType{constants.GraphTypeKLine}
-}
-
-func (this *KLineModel) SetValueTransformer(transformer transform.Transformer) {
-	this.valueTransformer = transformer
-}
-
-func (this *KLineModel) SetScaleTransformer(transformer transform.ScaleTransformer) {
-	this.scaleTransformer = transformer
-}
-
-func (this *KLineModel) AddListener(listener ModelListener) {
-	for _, l := range this.listeners {
-		if l == listener {
-			return
-		}
-	}
-	this.listeners = append(this.listeners, listener)
-}
-
-func (this *KLineModel) RemoveListener(listener ModelListener) {
-	for i, l := range this.listeners {
-		if l == listener {
-			this.listeners = append(this.listeners[:i], this.listeners[i+1:]...)
-			return
-		}
-	}
-}
-
-func (this *KLineModel) NotifyDataChanged() {
-	for _, listener := range this.listeners {
-		listener.OnDataChanged()
-	}
-}
-
-func (this *KLineModel) NotifyLastDataChanged() {
-	for _, listener := range this.listeners {
-		listener.OnLastDataChanged()
-	}
 }
