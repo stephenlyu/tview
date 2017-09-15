@@ -29,6 +29,7 @@ func NewLineGraph(model model.Model, valueIndex int, color *gui.QColor, scene *w
 
 	this := &LineGraph{
 		Model: model,
+		ValueIndex: valueIndex,
 		Scene: scene,
 		xTransformer: xTransformer,
 		color: color,
@@ -69,7 +70,7 @@ func (this *LineGraph) GetValueRange(startIndex int, endIndex int) (float64, flo
 	startIndex, endIndex = this.adjustIndices(startIndex, endIndex)
 
 	values := this.Model.GetRaw(startIndex)
-	util.Assert(len(values) > this.ValueIndex, len(values) > this.ValueIndex)
+	util.Assert(len(values) > this.ValueIndex, "len(values) > this.ValueIndex")
 
 	high := values[this.ValueIndex]
 	low := values[this.ValueIndex]
@@ -91,7 +92,7 @@ func (this *LineGraph) GetValueRange(startIndex int, endIndex int) (float64, flo
 func (this *LineGraph) buildLine() {
 	this.Clear()
 
-	if len(this.Model.Count() == 0) {
+	if this.Model.Count() == 0 {
 		return
 	}
 
@@ -99,7 +100,7 @@ func (this *LineGraph) buildLine() {
 
 	needMove := true
 	for i := this.startIndex; i < this.endIndex; i++ {
-		x := (this.xTransformer.To(i) + this.xTransformer.To(i + 1)) / 2
+		x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 1))) / 2
 		values := this.Model.Get(i)
 		v := values[this.ValueIndex]
 
@@ -116,7 +117,7 @@ func (this *LineGraph) buildLine() {
 		}
 	}
 
-	brush := gui.NewQBrush3(this.color, core.Qt__SolidPattern)
+	brush := gui.NewQBrush3(this.color, core.Qt__NoBrush)
 	pen := gui.NewQPen3(this.color)
 
 	this.PathItem = this.Scene.AddPath(path, pen, brush)

@@ -11,12 +11,15 @@ import (
 	"github.com/stephenlyu/tds/period"
 	"github.com/Sirupsen/logrus"
 	"github.com/stephenlyu/tview/model"
+	"path/filepath"
 )
 
+const ROOT = "/Users/stephenlv/go/src/github.com/stephenlyu/tview/cmd/tview"
+
 func initFormulaLibrary() {
-	model.GlobalLibrary.Register("MA", model.NewEasyLangFormulaCreatorFactory("formulas/MA.d"))
-	model.GlobalLibrary.Register("MACD", model.NewEasyLangFormulaCreatorFactory("formulas/MACD.d"))
-	model.GlobalLibrary.Register("VOL", model.NewEasyLangFormulaCreatorFactory("formulas/VOL.d"))
+	model.GlobalLibrary.Register("MA", model.NewEasyLangFormulaCreatorFactory(filepath.Join(ROOT, "formulas/MA.d")))
+	model.GlobalLibrary.Register("MACD", model.NewEasyLangFormulaCreatorFactory(filepath.Join(ROOT, "formulas/MACD.d")))
+	model.GlobalLibrary.Register("VOL", model.NewEasyLangFormulaCreatorFactory(filepath.Join(ROOT, "formulas/VOL.d")))
 }
 
 func main() {
@@ -28,10 +31,12 @@ func main() {
 	w.Push(graphView)
 	w.Widget.Show()
 
+	graphView.AddFormula("MA", []float64{5, 10, 20, 60})
+
 	timer := core.NewQTimer(w.Widget)
 	timer.SetSingleShot(true)
 	timer.ConnectTimeout(func () {
-		ds := tdxdatasource.NewDataSource("/Users/admin/go/src/github.com/stephenlyu/tview/cmd/tview/data", true)
+		ds := tdxdatasource.NewDataSource(filepath.Join(ROOT, "data"), true)
 		security, _ := entity.ParseSecurity("000001.SZ")
 		_, period := period.PeriodFromString("D1")
 		err, data := ds.GetData(security, period)

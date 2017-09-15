@@ -11,6 +11,9 @@ import (
 	"github.com/stephenlyu/tds/entity"
 	"github.com/stephenlyu/tview/model"
 	"fmt"
+	"github.com/stephenlyu/tview/constants"
+	"github.com/stephenlyu/tview/graphs/formulagraph"
+	"github.com/z-ray/log"
 )
 
 const (
@@ -117,21 +120,30 @@ func (this *GraphView) reset() {
 	this.yMin = 0
 }
 
+func (this *GraphView) setModelTransformers(model model.Model) {
+	model.SetValueTransformer(this.ValueTransformer)
+	model.SetScaleTransformer(this.YScaleTransformer)
+}
+
 func (this *GraphView) SetData(data []entity.Record) {
 	this.reset()
 	this.Data = model.NewData(data)
 	if this.IsMainGraph {
 		klineModel := model.NewKLineModel(this.Data)
-		klineModel.SetValueTransformer(this.ValueTransformer)
-		klineModel.SetScaleTransformer(this.YScaleTransformer)
-
+		this.setModelTransformers(klineModel)
 		this.Models[KLINE_MODEL] = klineModel
 
 		klineGraph := klinegraph.NewKLineGraph(klineModel, this.Scene(), this.XScaleTransformer)
 		this.Graphs[KLINE_MODEL] = klineGraph
 	}
 
+	for name := range this.FormulaCreators {
+		if name == KLINE_MODEL {
+			continue
+		}
 
+		this.createFormulaGraph(name)
+	}
 
 	this.LastVisibleIndex = this.Data.Count() - 1
 	this.ItemWidth = BEST_ITEM_WIDTH
@@ -140,16 +152,54 @@ func (this *GraphView) SetData(data []entity.Record) {
 	this.Layout()
 }
 
+func (this *GraphView) RemoveFormula(name string) {
+	delete(this.Models, name)
+	delete(this.FormulaCreators, name)
+
+	if graph, ok := this.Graphs[name]; ok {
+		graph.Clear()
+		delete(this.Graphs, name)
+	}
+}
+
 func (this *GraphView) AddFormula(name string, args []float64) {
 	if !model.GlobalLibrary.CanSupport(name) {
+		log.Errorf("formula %s not supported", name)
 		return
 	}
+
+	this.RemoveFormula(name)
 
 	creatorFactory := model.GlobalLibrary.GetCreatorFactory(name)
 
 	creator := creatorFactory.CreateFormulaCreator(args)
 
 	this.FormulaCreators[name] = creator
+
+	if this.Data != nil {
+		this.createFormulaGraph(name)
+	}
+	this.Layout()
+}
+
+func (this *GraphView) createFormulaGraph(name string) {
+	creator := this.FormulaCreators[name]
+
+	var graphTypes []constants.GraphType
+	switch name {
+	case "MACD":
+		graphTypes = []constants.GraphType{constants.GraphTypeLine, constants.GraphTypeLine, constants.GraphTypeStick}
+	case "MA":
+		graphTypes = []constants.GraphType{constants.GraphTypeLine, constants.GraphTypeLine, constants.GraphTypeLine, constants.GraphTypeLine}
+	case "VOL":
+		graphTypes = []constants.GraphType{constants.GraphTypeVolStick, constants.GraphTypeLine, constants.GraphTypeLine}
+	}
+
+	_, formula := creator.CreateFormula(this.Data)
+	model := model.NewFormulaModel(formula, graphTypes)
+	this.setModelTransformers(model)
+	this.Models[name] = model
+	this.Graphs[name] = formulagraph.NewFormulaGraph(model, this.Scene(), this.XScaleTransformer)
 }
 
 // UI routines
