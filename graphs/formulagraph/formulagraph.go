@@ -8,6 +8,8 @@ import (
 	"github.com/stephenlyu/tview/graphs"
 	"github.com/stephenlyu/tview/constants"
 	"github.com/stephenlyu/tview/graphs/linegraph"
+	"github.com/stephenlyu/tview/graphs/stickgraph"
+	"github.com/stephenlyu/tview/graphs/volgraph"
 )
 
 type FormulaGraph struct {
@@ -33,16 +35,18 @@ func NewFormulaGraph(model model.Model, scene *widgets.QGraphicsScene, xTransfor
 func (this *FormulaGraph) init() {
 	graphTypes := this.Model.GetGraphTypes()
 	this.graphs = make([]graphs.Graph, len(graphTypes))
+	j := 0
 	for i, graphType := range graphTypes {
-		color := graphs.COLORS[i % len(graphs.COLORS)]
 		var graph graphs.Graph
 		switch graphType {
 		case constants.GraphTypeLine:
+			color := graphs.COLORS[j % len(graphs.COLORS)]
+			j++
 			graph = linegraph.NewLineGraph(this.Model, i, color, this.Scene, this.xTransformer)
 		case constants.GraphTypeStick:
-			// TODO:
+			graph = stickgraph.NewStickGraph(this.Model, i, this.Scene, this.xTransformer)
 		case constants.GraphTypeVolStick:
-			// TODO:
+			graph = volgraph.NewVolStickGraph(this.Model, i, this.Scene, this.xTransformer)
 		}
 		this.graphs[i] = graph
 	}

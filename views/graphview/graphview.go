@@ -10,7 +10,6 @@ import (
 	"github.com/stephenlyu/tview/graphs"
 	"github.com/stephenlyu/tds/entity"
 	"github.com/stephenlyu/tview/model"
-	"fmt"
 	"github.com/stephenlyu/tview/constants"
 	"github.com/stephenlyu/tview/graphs/formulagraph"
 	"github.com/z-ray/log"
@@ -260,7 +259,7 @@ func (this *GraphView) Layout() {
 	if this.Data == nil {
 		return
 	}
-	fmt.Println("Layout", this.Data.Count())
+
 	if this.ItemWidth <= 0 {
 		this.ItemWidth = BEST_ITEM_WIDTH
 	}

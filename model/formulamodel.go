@@ -43,10 +43,9 @@ func (this *FormulaModel) Get(index int) []float64 {
 	values := this.GetRaw(index)
 
 	if this.scaleTransformer != nil {
-		values[0] = this.scaleTransformer.To(values[0])
-		values[1] = this.scaleTransformer.To(values[1])
-		values[2] = this.scaleTransformer.To(values[2])
-		values[3] = this.scaleTransformer.To(values[3])
+		for i := range values {
+			values[i] = this.scaleTransformer.To(values[i])
+		}
 	}
 
 	return values
