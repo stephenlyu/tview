@@ -93,6 +93,11 @@ func (this *StickGraph) GetValueRange(startIndex int, endIndex int) (float64, fl
 		}
 	}
 
+	// X轴
+	if low > 0 {
+		low = 0
+	}
+
 	return low, high
 }
 

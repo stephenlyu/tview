@@ -127,11 +127,12 @@ func (this *GraphView) setModelTransformers(model model.Model) {
 func (this *GraphView) SetData(data []entity.Record) {
 	this.reset()
 	this.Data = model.NewData(data)
-	if this.IsMainGraph {
-		klineModel := model.NewKLineModel(this.Data)
-		this.setModelTransformers(klineModel)
-		this.Models[KLINE_MODEL] = klineModel
 
+	klineModel := model.NewKLineModel(this.Data)
+	this.setModelTransformers(klineModel)
+	this.Models[KLINE_MODEL] = klineModel
+
+	if this.IsMainGraph {
 		klineGraph := klinegraph.NewKLineGraph(klineModel, this.Scene(), this.XScaleTransformer)
 		this.Graphs[KLINE_MODEL] = klineGraph
 	}
@@ -198,7 +199,7 @@ func (this *GraphView) createFormulaGraph(name string) {
 	model := model.NewFormulaModel(formula, graphTypes)
 	this.setModelTransformers(model)
 	this.Models[name] = model
-	this.Graphs[name] = formulagraph.NewFormulaGraph(model, this.Scene(), this.XScaleTransformer)
+	this.Graphs[name] = formulagraph.NewFormulaGraph(model, this.Models[KLINE_MODEL], this.Scene(), this.XScaleTransformer)
 }
 
 // UI routines
@@ -239,8 +240,8 @@ func (this *GraphView) UpdateUI() {
 	if fullMode {
 		width = float64(this.Width() - 2 * H_MARGIN)
 	}
-	height := yMax
-	this.Scene().SetSceneRect2(-H_MARGIN, -V_MARGIN, width + 2 * H_MARGIN, height + 2 * V_MARGIN)
+	height := yMax - yMin
+	this.Scene().SetSceneRect2(-H_MARGIN, yMin - V_MARGIN, width + 2 * H_MARGIN, height + 2 * V_MARGIN)
 
 	yCenter := (yMax + yMin) / 2
 	var xCenter float64

@@ -14,6 +14,7 @@ import (
 
 type VolStickGraph struct {
 	Model model.Model
+	KLineModel model.Model
 	ValueIndex int
 	Scene *widgets.QGraphicsScene
 	xTransformer transform.ScaleTransformer
@@ -22,13 +23,14 @@ type VolStickGraph struct {
 	Lines map[int]*widgets.QGraphicsPathItem
 }
 
-func NewVolStickGraph(model model.Model, valueIndex int, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *VolStickGraph {
+func NewVolStickGraph(model model.Model, valueIndex int, klineModel model.Model, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *VolStickGraph {
 	util.Assert(model != nil, "model != nil")
 	util.Assert(len(model.GetGraphTypes()) > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
 	util.Assert(model.GetGraphTypes()[valueIndex] == constants.GraphTypeVolStick, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeVolStick")
 
 	this := &VolStickGraph{
 		Model: model,
+		KLineModel: klineModel,
 		ValueIndex: valueIndex,
 		Scene: scene,
 		xTransformer: xTransformer,
@@ -93,6 +95,10 @@ func (this *VolStickGraph) GetValueRange(startIndex int, endIndex int) (float64,
 		}
 	}
 
+	if low > 0 {
+		low = 0
+	}
+
 	return low, high
 }
 
@@ -116,7 +122,11 @@ func (this *VolStickGraph) updateStick(i int, item *widgets.QGraphicsPathItem) {
 
 	path.AddRect2(x - w, 0, w * 2, y)
 
-	if y < 0 {
+	klineValues := this.KLineModel.GetRaw(i)
+	open := klineValues[0]
+	close := klineValues[1]
+
+	if close < open {
 		item.SetBrush(gui.NewQBrush3(graphs.NegativeColor, core.Qt__SolidPattern))
 		item.SetPen(gui.NewQPen3(graphs.NegativeColor))
 	} else {

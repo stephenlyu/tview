@@ -14,17 +14,19 @@ import (
 
 type FormulaGraph struct {
 	Model model.Model
+	KLineModel model.Model
 	Scene *widgets.QGraphicsScene
 	xTransformer transform.ScaleTransformer
 
 	graphs []graphs.Graph
 }
 
-func NewFormulaGraph(model model.Model, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *FormulaGraph {
+func NewFormulaGraph(model model.Model, klineModel model.Model, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *FormulaGraph {
 	util.Assert(model != nil, "model != nil")
 
 	this := &FormulaGraph{
 		Model: model,
+		KLineModel: klineModel,
 		Scene: scene,
 		xTransformer: xTransformer,
 	}
@@ -46,7 +48,7 @@ func (this *FormulaGraph) init() {
 		case constants.GraphTypeStick:
 			graph = stickgraph.NewStickGraph(this.Model, i, this.Scene, this.xTransformer)
 		case constants.GraphTypeVolStick:
-			graph = volgraph.NewVolStickGraph(this.Model, i, this.Scene, this.xTransformer)
+			graph = volgraph.NewVolStickGraph(this.Model, i, this.KLineModel, this.Scene, this.xTransformer)
 		}
 		this.graphs[i] = graph
 	}

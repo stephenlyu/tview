@@ -41,11 +41,11 @@ func (this *KLineItem) Update(x float64, w float64, open float64, close float64,
 
 	var brush *gui.QBrush
 	if close > open {
-		brush = gui.NewQBrush3(graphs.NegativeColor, core.Qt__SolidPattern)
+		brush = gui.NewQBrush3(graphs.PositiveColor, core.Qt__SolidPattern)
 	} else if close == open {
 		brush = gui.NewQBrush4(core.Qt__white, core.Qt__SolidPattern)
 	} else {
-		brush = gui.NewQBrush3(graphs.PositiveColor, core.Qt__SolidPattern)
+		brush = gui.NewQBrush3(graphs.NegativeColor, core.Qt__SolidPattern)
 	}
 
 	this.Item.SetBrush(brush)

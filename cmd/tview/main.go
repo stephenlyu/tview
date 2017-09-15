@@ -27,12 +27,12 @@ func main() {
 
 	app := widgets.NewQApplication(len(os.Args), os.Args)
 	w := mainwindow.GetMainWindow(nil)
-	graphView := graphview.CreateGraphView(false, w.Widget)
+	graphView := graphview.CreateGraphView(true, w.Widget)
 	w.Push(graphView)
 	w.Widget.Show()
 
-	//graphView.AddFormula("MA", []float64{5, 10, 20, 60})
-	graphView.AddFormula("MACD", []float64{12, 26, 9})
+	graphView.AddFormula("MA", []float64{5, 10, 20, 60})
+	//graphView.AddFormula("MACD", []float64{12, 26, 9})
 	//graphView.AddFormula("VOL", []float64{5, 10})
 
 	timer := core.NewQTimer(w.Widget)
