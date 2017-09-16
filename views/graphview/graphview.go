@@ -257,7 +257,7 @@ func (this *GraphView) UpdateUI() {
 }
 
 func (this *GraphView) Layout() {
-	if this.Data == nil {
+	if this.Data == nil || len(this.Graphs) == 0 {
 		return
 	}
 

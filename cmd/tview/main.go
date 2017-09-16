@@ -27,13 +27,14 @@ func main() {
 
 	app := widgets.NewQApplication(len(os.Args), os.Args)
 	w := mainwindow.GetMainWindow(nil)
-	graphView := graphview.CreateGraphView(true, w.Widget)
-	w.Push(graphView)
+	//graphView := graphview.CreateGraphView(true, w.Widget)
+	container := graphview.CreateGraphViewContainer(w.Widget)
+	w.Push(container)
 	w.Widget.Show()
 
-	graphView.AddFormula("MA", []float64{5, 10, 20, 60})
-	//graphView.AddFormula("MACD", []float64{12, 26, 9})
-	//graphView.AddFormula("VOL", []float64{5, 10})
+	container.AddGraphFormula(0, "MA", []float64{5, 10, 20, 60})
+	container.AddGraphFormula(1, "MACD", []float64{12, 26, 9})
+	container.AddGraphFormula(2, "VOL", []float64{5, 10})
 
 	timer := core.NewQTimer(w.Widget)
 	timer.SetSingleShot(true)
@@ -45,7 +46,7 @@ func main() {
 		if err != nil {
 			logrus.Fatalf("加载数据失败，错误：%s", err.Error())
 		}
-		graphView.SetData(data)
+		container.SetData(data)
 	})
 	timer.Start(100)
 
