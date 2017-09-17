@@ -13,12 +13,12 @@ import (
 	"github.com/stephenlyu/tview/constants"
 	"github.com/stephenlyu/tview/graphs/formulagraph"
 	"github.com/z-ray/log"
+	"github.com/cznic/mathutil"
 )
 
 const (
 	VISIBLE_KLINES_MIN = 16		// 最少可见K线数
 	BEST_ITEM_WIDTH = 10		// Item最佳显示宽度
-	MIN_ITEM_WIDTH = 3			// Item最小显示宽度, 1像素宽，1像素边距
 )
 
 const (
@@ -27,6 +27,10 @@ const (
 )
 
 const KLINE_MODEL = "__kline__"
+
+type Controller interface {
+	HandleKeyEvent(event *gui.QKeyEvent) bool
+}
 
 //go:generate qtmoc
 type GraphView struct {
@@ -54,6 +58,10 @@ type GraphView struct {
 	// Graphs
 
 	Graphs map[string]graphs.Graph
+
+	// Controller
+
+	Controller Controller
 
 	// State Variables
 
@@ -329,7 +337,51 @@ func (this *GraphView) ResizeEvent(event *gui.QResizeEvent) {
 }
 
 func (this *GraphView) KeyPressEvent(event *gui.QKeyEvent) {
+	if this.Controller != nil {
+		if this.Controller.HandleKeyEvent(event) {
+			return
+		}
+	}
 }
 
 func (this *GraphView) WheelEvent(event *gui.QWheelEvent) {
+}
+
+// Control routines
+
+func (this *GraphView) GetItemWidth() float64 {
+	if this.ItemWidth <= 0 {
+		this.ItemWidth = BEST_ITEM_WIDTH
+	}
+	return this.ItemWidth
+}
+
+func (this *GraphView) GetUsableWidth() float64 {
+	return float64(this.Width()) - 2 * H_MARGIN
+}
+
+func (this *GraphView) SetVisibleRange(lastVisibleIndex int, visibleCount int) {
+	if this.Data == nil || this.Data.Count() == 0 {
+		return
+	}
+	if lastVisibleIndex < 0 || lastVisibleIndex >= this.Data.Count() {
+		return
+	}
+
+	if visibleCount <= 0 {
+		return
+	}
+
+	firstVisibleIndex := int(mathutil.MaxInt32(0, int32(lastVisibleIndex - visibleCount + 1)))
+	visibleCount = lastVisibleIndex - firstVisibleIndex + 1
+
+	this.LastVisibleIndex = lastVisibleIndex
+	usableWidth := float64(this.Width()) - 2 * H_MARGIN
+	this.ItemWidth = usableWidth / float64(visibleCount)
+
+	this.Layout()
+}
+
+func (this *GraphView) SetController(controller Controller) {
+	this.Controller = controller
 }
