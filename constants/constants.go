@@ -32,3 +32,8 @@ var (
 	TRACK_LINE_COLOR = gui.NewQColor3(255, 255, 255, 0x9F)
 	SELECT_RECT_COLOR = gui.NewQColor3(255, 255, 255, 0x9F)
 )
+
+const (
+	SEPARATOR_GAP_MIN = 50
+	SEPARATOR_MAX = 10
+)
