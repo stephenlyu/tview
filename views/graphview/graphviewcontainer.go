@@ -6,17 +6,13 @@ import (
 	"github.com/stephenlyu/tds/entity"
 	"github.com/stephenlyu/tview/views/mainwindow"
 	"github.com/therecipe/qt/gui"
+	"github.com/stephenlyu/tview/constants"
+	"fmt"
 )
 
 const MAX_SECONDARY_GRAPHS = 5
 const DEFAULT_SECONDARY_GRAPHS = 2
 
-const (
-	MIN_ITEM_WIDTH = 1			// Item最小显示宽度, 1像素宽，1像素边距
-	MAX_ITEM_WIDTH = 100
-
-	ZOOM_OUT = 1.2
-)
 
 //go:generate qtmoc
 type GraphViewContainer struct {
@@ -67,6 +63,10 @@ func (this *GraphViewContainer) init() {
 		this.AddWidget(graphView)
 		this.SetStretchFactor(i + 1, 1)
 		this.graphViews[i + 1] = graphView
+	}
+
+	for i := 0; i < DEFAULT_SECONDARY_GRAPHS + 1; i++ {
+		this.ShowGraph(i)
 	}
 
 	for i := DEFAULT_SECONDARY_GRAPHS; i < MAX_SECONDARY_GRAPHS; i++ {
@@ -155,22 +155,22 @@ func (this *GraphViewContainer) doZoom(scale float64) {
 
 	var itemWidth float64
 	if scale < 1 {
-		if this.itemWidth <= MIN_ITEM_WIDTH {
+		if this.itemWidth <= constants.MIN_ITEM_WIDTH {
 			return
 		}
 
 		itemWidth = this.itemWidth * scale
-		if itemWidth < MIN_ITEM_WIDTH {
-			itemWidth = MIN_ITEM_WIDTH
+		if itemWidth < constants.MIN_ITEM_WIDTH {
+			itemWidth = constants.MIN_ITEM_WIDTH
 		}
 	} else {
-		if this.itemWidth >= MAX_ITEM_WIDTH {
+		if this.itemWidth >= constants.MAX_ITEM_WIDTH {
 			return
 		}
 
 		itemWidth = this.itemWidth * scale
-		if itemWidth > MAX_ITEM_WIDTH {
-			itemWidth = MAX_ITEM_WIDTH
+		if itemWidth > constants.MAX_ITEM_WIDTH {
+			itemWidth = constants.MAX_ITEM_WIDTH
 		}
 	}
 
@@ -181,9 +181,28 @@ func (this *GraphViewContainer) doZoom(scale float64) {
 func (this *GraphViewContainer) HandleKeyEvent(event *gui.QKeyEvent) bool {
 	var key = core.Qt__Key(event.Key())
 	if key == core.Qt__Key_Up {
-		this.doZoom(ZOOM_OUT)
+		this.doZoom(constants.ZOOM_OUT)
 	} else if key == core.Qt__Key_Down {
-		this.doZoom(1 / ZOOM_OUT)
+		this.doZoom(1 / constants.ZOOM_OUT)
 	}
 	return false
+}
+
+// Track Point
+// x: global x coordinate
+// y: global y coordinate
+func (this *GraphViewContainer) TrackPoint(x float64, y float64) {
+	for i, view := range this.graphViews {
+		if !this.visibleIndices[i] {
+			continue
+		}
+		view.TrackPoint(x, y)
+	}
+}
+
+func (this *GraphViewContainer) CompleteTrackPoint() {
+	fmt.Println("GraphViewContainer.CompleteTrackPoint")
+	for _, view := range this.graphViews {
+		view.CompleteTrackPoint()
+	}
 }

@@ -14,22 +14,27 @@ import (
 	"github.com/stephenlyu/tview/graphs/formulagraph"
 	"github.com/z-ray/log"
 	"github.com/cznic/mathutil"
+	"github.com/stephenlyu/tview/graphs/trackline"
+	"fmt"
 )
 
 const (
-	VISIBLE_KLINES_MIN = 16		// 最少可见K线数
-	BEST_ITEM_WIDTH = 10		// Item最佳显示宽度
+	VISIBLE_KLINES_MIN = constants.VISIBLE_KLINES_MIN
+	BEST_ITEM_WIDTH = constants.BEST_ITEM_WIDTH
 )
 
 const (
-	H_MARGIN = 10
-	V_MARGIN = 10
+	H_MARGIN = constants.H_MARGIN
+	V_MARGIN = constants.V_MARGIN
 )
 
 const KLINE_MODEL = "__kline__"
 
 type Controller interface {
 	HandleKeyEvent(event *gui.QKeyEvent) bool
+
+	TrackPoint(x float64, y float64)
+	CompleteTrackPoint()
 }
 
 //go:generate qtmoc
@@ -58,6 +63,7 @@ type GraphView struct {
 	// Graphs
 
 	Graphs map[string]graphs.Graph
+	TrackLine *trackline.TrackLine
 
 	// Controller
 
@@ -70,11 +76,14 @@ type GraphView struct {
 	FirstVisibleIndex, LastVisibleIndex int
 	ItemWidth float64									// 每个数据占用的屏幕宽度
 
+	isTracking bool
+
 	yMax, yMin float64
 }
 
 func CreateGraphView(isMain bool, parent widgets.QWidget_ITF) *GraphView {
 	this := NewGraphView(parent)
+	this.SetMouseTracking(true)
 	this.IsMainGraph = isMain
 	this.Models = make(map[string]model.Model)
 	this.Graphs = make(map[string]graphs.Graph)
@@ -84,6 +93,8 @@ func CreateGraphView(isMain bool, parent widgets.QWidget_ITF) *GraphView {
 	this.ValueTransformer = transform.NewEQTransformer()
 	this.XScaleTransformer = transform.NewLogicTransformer(1)
 	this.YScaleTransformer = transform.NewLogicTransformer(1)
+
+	this.TrackLine = trackline.NewTrackLine(this.Scene())
 
 	return this
 }
@@ -114,6 +125,7 @@ func (this *GraphView) reset() {
 		graph.Clear()
 	}
 	this.Graphs = make(map[string]graphs.Graph)
+	this.TrackLine.Clear()
 
 	// Clear data & models
 	this.Data = nil
@@ -216,6 +228,11 @@ func (this *GraphView) connectEvents() {
 	this.ConnectKeyPressEvent(this.KeyPressEvent)
 	this.ConnectResizeEvent(this.ResizeEvent)
 	this.ConnectWheelEvent(this.WheelEvent)
+
+	this.ConnectMousePressEvent(this.MousePressEvent)
+	this.ConnectMouseReleaseEvent(this.MouseReleaseEvent)
+	this.ConnectMouseMoveEvent(this.MouseMoveEvent)
+	this.ConnectMouseDoubleClickEvent(this.MouseDoubleClickEvent)
 }
 
 func (this *GraphView) init() {
@@ -347,6 +364,38 @@ func (this *GraphView) KeyPressEvent(event *gui.QKeyEvent) {
 func (this *GraphView) WheelEvent(event *gui.QWheelEvent) {
 }
 
+func (this *GraphView) MouseDoubleClickEvent(event *gui.QMouseEvent) {
+	if event.Button() != core.Qt__LeftButton {
+		return
+	}
+
+	if this.isTracking {
+		if this.Controller != nil {
+			this.Controller.CompleteTrackPoint()
+		}
+	} else {
+		if this.Controller != nil {
+			this.Controller.TrackPoint(float64(event.GlobalX()), float64(event.GlobalY()))
+		}
+	}
+}
+
+func (this *GraphView) MouseMoveEvent(event *gui.QMouseEvent) {
+	if this.isTracking {
+		if this.Controller != nil {
+			this.Controller.TrackPoint(float64(event.GlobalX()), float64(event.GlobalY()))
+		}
+	}
+}
+
+func (this *GraphView) MousePressEvent(event *gui.QMouseEvent) {
+	fmt.Println("MousePressEvent")
+}
+
+func (this *GraphView) MouseReleaseEvent(event *gui.QMouseEvent) {
+	fmt.Println("MouseReleaseEvent")
+}
+
 // Control routines
 
 func (this *GraphView) GetItemWidth() float64 {
@@ -384,4 +433,17 @@ func (this *GraphView) SetVisibleRange(lastVisibleIndex int, visibleCount int) {
 
 func (this *GraphView) SetController(controller Controller) {
 	this.Controller = controller
+}
+
+func (this *GraphView) TrackPoint(x float64, y float64) {
+	pt := this.MapFromGlobal(core.NewQPoint2(int(x), int(y)))
+	pt1 := this.MapToScene(pt)
+
+	this.TrackLine.UpdateTrackLine(pt1.X(), pt1.Y())
+	this.isTracking = true
+}
+
+func (this *GraphView) CompleteTrackPoint() {
+	this.TrackLine.Clear()
+	this.isTracking = false
 }
