@@ -28,4 +28,7 @@ const (
 	ZOOM_OUT = 1.2
 )
 
-var TRACK_LINE_COLOR = gui.NewQColor3(255, 255, 255, 0x9F)
+var (
+	TRACK_LINE_COLOR = gui.NewQColor3(255, 255, 255, 0x9F)
+	SELECT_RECT_COLOR = gui.NewQColor3(255, 255, 255, 0x9F)
+)

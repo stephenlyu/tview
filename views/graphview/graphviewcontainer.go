@@ -226,3 +226,18 @@ func (this *GraphViewContainer) CompleteTrackPoint() {
 	}
 	this.currentIndex = -1
 }
+
+func (this *GraphViewContainer) SetVisibleRangeIndex(firstVisibleIndex int, lastVisibleIndex int) {
+	visibleCount := lastVisibleIndex - firstVisibleIndex + 1
+	if visibleCount < constants.VISIBLE_KLINES_MIN {
+		return
+	}
+
+	usableMainWidth := this.graphViews[0].GetUsableWidth()
+	this.itemWidth = usableMainWidth / float64(visibleCount)
+
+	for _, view := range this.graphViews {
+		view.SetVisibleRange(lastVisibleIndex, visibleCount)
+	}
+	this.lastVisibleIndex = lastVisibleIndex
+}

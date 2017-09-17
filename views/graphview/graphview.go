@@ -15,8 +15,8 @@ import (
 	"github.com/z-ray/log"
 	"github.com/cznic/mathutil"
 	"github.com/stephenlyu/tview/graphs/trackline"
-	"fmt"
 	"github.com/stephenlyu/tds/util"
+	"github.com/stephenlyu/tview/graphs/selectrect"
 )
 
 const (
@@ -32,6 +32,7 @@ const (
 const KLINE_MODEL = "__kline__"
 
 type Controller interface {
+	SetVisibleRangeIndex(firstVisibleIndex int, lastVisibleIndex int)
 	HandleKeyEvent(event *gui.QKeyEvent) bool
 
 	TrackPoint(currentIndex int, x float64, y float64)
@@ -65,6 +66,7 @@ type GraphView struct {
 
 	Graphs map[string]graphs.Graph
 	TrackLine *trackline.TrackLine
+	SelectRect *selectrect.SelectRect
 
 	// Controller
 
@@ -78,6 +80,8 @@ type GraphView struct {
 	ItemWidth float64									// 每个数据占用的屏幕宽度
 
 	isTracking bool
+
+	PressedPoint *core.QPointF
 
 	yMax, yMin float64
 }
@@ -96,6 +100,7 @@ func CreateGraphView(isMain bool, parent widgets.QWidget_ITF) *GraphView {
 	this.YScaleTransformer = transform.NewLogicTransformer(1)
 
 	this.TrackLine = trackline.NewTrackLine(this.Scene())
+	this.SelectRect = selectrect.NewSelectRect(this.Scene())
 
 	return this
 }
@@ -404,15 +409,56 @@ func (this *GraphView) MouseMoveEvent(event *gui.QMouseEvent) {
 			}
 			this.Controller.TrackPoint(currentIndex, float64(event.GlobalX()), float64(event.GlobalY()))
 		}
+	} else if this.PressedPoint != nil {
+		ptStart := this.PressedPoint
+		ptScene := this.MapToScene(event.Pos())
+		var x, y float64
+		w := ptScene.X() - ptStart.X()
+		if w < 0 {
+			x = ptScene.X()
+			w = -w
+		} else {
+			x = ptStart.X()
+		}
+		h := ptScene.Y() - ptStart.Y()
+		if h < 0 {
+			y = ptScene.Y()
+			h = -h
+		} else {
+			y = ptStart.Y()
+		}
+		this.SelectRect.UpdateRect(x, y, w, h)
 	}
 }
 
 func (this *GraphView) MousePressEvent(event *gui.QMouseEvent) {
-	fmt.Println("MousePressEvent")
+	if event.Button() != core.Qt__LeftButton {
+		return
+	}
+	this.PressedPoint = this.MapToScene(event.Pos())
 }
 
 func (this *GraphView) MouseReleaseEvent(event *gui.QMouseEvent) {
-	fmt.Println("MouseReleaseEvent")
+	this.PressedPoint = nil
+	if this.SelectRect.GetRect() != nil {
+		r := this.SelectRect.GetRect()
+		this.SelectRect.Clear()
+
+		startIndex := int(this.XScaleTransformer.From(r.X()))
+		endIndex := int(this.XScaleTransformer.From(r.X() + r.Width()))
+
+		if startIndex > 0 {
+			startIndex--
+		}
+
+		if endIndex < this.Data.Count() - 1 {
+			endIndex++
+		}
+
+		if this.Controller != nil {
+			this.Controller.SetVisibleRangeIndex(startIndex, endIndex)
+		}
+	}
 }
 
 // Control routines
