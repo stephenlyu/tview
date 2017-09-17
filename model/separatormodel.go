@@ -39,7 +39,6 @@ func (this *SeparatorModel) Update(min float64, max float64, viewHeight float64)
 	if n > constants.SEPARATOR_MAX {
 		n = constants.SEPARATOR_MAX
 	}
-
 	this.values = calculateValues(min, max, n)
 }
 
@@ -71,7 +70,12 @@ func calculateValues(min float64, max float64, n int) []float64 {
 	diff := max - min
 	per := diff / float64(n)
 	level := int(math.Log10(per))
-	unit := math.Pow(10, float64(level))
+	var unit float64
+	if level > 0 {
+		unit = math.Pow(10, float64(level))
+	} else {
+		unit = math.Pow(10, float64(level - 1))
+	}
 	per = float64(int(per / unit)) * unit
 	if per < 0 {
 		per -= unit
@@ -81,16 +85,18 @@ func calculateValues(min float64, max float64, n int) []float64 {
 
 	var values []float64
 	if min > 0 || max < 0 {
-		v := float64(int((min + per - 1) / per)) * per
+		v := float64(int(min / per)) * per
 		for ; v < max; v += per {
-			values = append(values, v)
+			if v > min {
+				values = append(values, v)
+			}
 		}
 	} else {
 		values = append(values, 0)
-		for v := 0.; v > min; v-=per {
+		for v := -per; v > min; v-=per {
 			values = append(values, v)
 		}
-		for v := 0.; v < max; v += per {
+		for v := per; v < max; v += per {
 			values = append(values, v)
 		}
 	}

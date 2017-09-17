@@ -17,6 +17,7 @@ import (
 	"github.com/stephenlyu/tview/graphs/trackline"
 	"github.com/stephenlyu/tds/util"
 	"github.com/stephenlyu/tview/graphs/selectrect"
+	"github.com/stephenlyu/tview/graphs/separatorgraph"
 )
 
 const (
@@ -57,6 +58,7 @@ type GraphView struct {
 	// Models
 
 	Models map[string]model.Model
+	SeparatorModel *model.SeparatorModel
 
 	// Formula creators
 
@@ -67,6 +69,7 @@ type GraphView struct {
 	Graphs map[string]graphs.Graph
 	TrackLine *trackline.TrackLine
 	SelectRect *selectrect.SelectRect
+	SeparatorGraph *separatorgraph.SeparatorGraph
 
 	// Controller
 
@@ -91,6 +94,7 @@ func CreateGraphView(isMain bool, parent widgets.QWidget_ITF) *GraphView {
 	this.SetMouseTracking(true)
 	this.IsMainGraph = isMain
 	this.Models = make(map[string]model.Model)
+	this.SeparatorModel = model.NewSeparatorModel()
 	this.Graphs = make(map[string]graphs.Graph)
 	this.FormulaCreators = make(map[string]model.FormulaCreator)
 	this.init()
@@ -101,6 +105,7 @@ func CreateGraphView(isMain bool, parent widgets.QWidget_ITF) *GraphView {
 
 	this.TrackLine = trackline.NewTrackLine(this.Scene())
 	this.SelectRect = selectrect.NewSelectRect(this.Scene())
+	this.SeparatorGraph = separatorgraph.NewSeparatorGraph(this.Scene(), this.YScaleTransformer, this.SeparatorModel)
 
 	return this
 }
@@ -267,9 +272,10 @@ func (this *GraphView) UpdateUI() {
 	yMin := this.YScaleTransformer.To(this.yMin)
 
 	width := float64(this.Data.Count()) * this.ItemWidth
-	fullMode := width < float64(this.Width() - 2 * H_MARGIN)
+	usableWidth := this.Width() - 2 * H_MARGIN
+	fullMode := width < float64(usableWidth)
 	if fullMode {
-		width = float64(this.Width() - 2 * H_MARGIN)
+		width = float64(usableWidth)
 	}
 	height := yMax - yMin
 	this.Scene().SetSceneRect2(-H_MARGIN, yMin - V_MARGIN, width + 2 * H_MARGIN, height + 2 * V_MARGIN)
@@ -283,6 +289,11 @@ func (this *GraphView) UpdateUI() {
 	}
 
 	this.CenterOn2(xCenter, yCenter)
+
+	// 更新Separator lines，此时Scene的宽度已经确定
+
+	this.SeparatorModel.Update(this.yMin, this.yMax, float64(this.Height() - 2 * V_MARGIN))
+	this.SeparatorModel.NotifyDataChanged()
 
 	this.Scene().Update2(xCenter - float64(this.Width()) / 2, yMin, float64(this.Width()), float64(this.Height()))
 }
