@@ -32,12 +32,14 @@ type GraphViewContainer struct {
 	// Data & Model
 
 	data []entity.Record
+	currentIndex int
 }
 
 // Life Cycle Routines
 
 func CreateGraphViewContainer(parent widgets.QWidget_ITF) *GraphViewContainer {
 	ret := NewGraphViewContainer(parent)
+	ret.currentIndex = -1
 	ret.SetOrientation(core.Qt__Vertical)
 	ret.SetStyleSheet("QGraphicsView { background-color: black; }")
 	ret.SetOpaqueResize(false)
@@ -184,6 +186,22 @@ func (this *GraphViewContainer) HandleKeyEvent(event *gui.QKeyEvent) bool {
 		this.doZoom(constants.ZOOM_OUT)
 	} else if key == core.Qt__Key_Down {
 		this.doZoom(1 / constants.ZOOM_OUT)
+	} else if key == core.Qt__Key_Left {
+		if this.currentIndex < 0 {
+			x, y := this.graphViews[0].GetItemXY(this.lastVisibleIndex)
+			this.TrackPoint(this.lastVisibleIndex, x, y)
+		} else if this.currentIndex > 0 {
+			x, y := this.graphViews[0].GetItemXY(this.currentIndex - 1)
+			this.TrackPoint(this.currentIndex - 1, x, y)
+		}
+	} else if key == core.Qt__Key_Right {
+		if this.currentIndex < 0 {
+			x, y := this.graphViews[0].GetItemXY(this.lastVisibleIndex)
+			this.TrackPoint(this.lastVisibleIndex, x, y)
+		} else if this.currentIndex < len(this.data) - 1 {
+			x, y := this.graphViews[0].GetItemXY(this.currentIndex + 1)
+			this.TrackPoint(this.currentIndex + 1, x, y)
+		}
 	}
 	return false
 }
@@ -191,12 +209,13 @@ func (this *GraphViewContainer) HandleKeyEvent(event *gui.QKeyEvent) bool {
 // Track Point
 // x: global x coordinate
 // y: global y coordinate
-func (this *GraphViewContainer) TrackPoint(x float64, y float64) {
+func (this *GraphViewContainer) TrackPoint(currentIndex int, x float64, y float64) {
 	for i, view := range this.graphViews {
 		if !this.visibleIndices[i] {
 			continue
 		}
-		view.TrackPoint(x, y)
+		this.currentIndex = currentIndex
+		view.TrackPoint(currentIndex, x, y)
 	}
 }
 
@@ -205,4 +224,5 @@ func (this *GraphViewContainer) CompleteTrackPoint() {
 	for _, view := range this.graphViews {
 		view.CompleteTrackPoint()
 	}
+	this.currentIndex = -1
 }

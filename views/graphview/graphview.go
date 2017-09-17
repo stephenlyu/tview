@@ -16,6 +16,7 @@ import (
 	"github.com/cznic/mathutil"
 	"github.com/stephenlyu/tview/graphs/trackline"
 	"fmt"
+	"github.com/stephenlyu/tds/util"
 )
 
 const (
@@ -33,7 +34,7 @@ const KLINE_MODEL = "__kline__"
 type Controller interface {
 	HandleKeyEvent(event *gui.QKeyEvent) bool
 
-	TrackPoint(x float64, y float64)
+	TrackPoint(currentIndex int, x float64, y float64)
 	CompleteTrackPoint()
 }
 
@@ -375,7 +376,16 @@ func (this *GraphView) MouseDoubleClickEvent(event *gui.QMouseEvent) {
 		}
 	} else {
 		if this.Controller != nil {
-			this.Controller.TrackPoint(float64(event.GlobalX()), float64(event.GlobalY()))
+			ptScene := this.MapToScene(event.Pos())
+			currentIndex := int(this.XScaleTransformer.From(ptScene.X()))
+			if currentIndex >= this.Data.Count() {
+				currentIndex = this.Data.Count() - 1
+			}
+
+			if currentIndex < 0 {
+				currentIndex = 0
+			}
+			this.Controller.TrackPoint(currentIndex, float64(event.GlobalX()), float64(event.GlobalY()))
 		}
 	}
 }
@@ -383,7 +393,16 @@ func (this *GraphView) MouseDoubleClickEvent(event *gui.QMouseEvent) {
 func (this *GraphView) MouseMoveEvent(event *gui.QMouseEvent) {
 	if this.isTracking {
 		if this.Controller != nil {
-			this.Controller.TrackPoint(float64(event.GlobalX()), float64(event.GlobalY()))
+			ptScene := this.MapToScene(event.Pos())
+			currentIndex := int(this.XScaleTransformer.From(ptScene.X()))
+			if currentIndex >= this.Data.Count() {
+				currentIndex = this.Data.Count() - 1
+			}
+
+			if currentIndex < 0 {
+				currentIndex = 0
+			}
+			this.Controller.TrackPoint(currentIndex, float64(event.GlobalX()), float64(event.GlobalY()))
 		}
 	}
 }
@@ -407,6 +426,23 @@ func (this *GraphView) GetItemWidth() float64 {
 
 func (this *GraphView) GetUsableWidth() float64 {
 	return float64(this.Width()) - 2 * H_MARGIN
+}
+
+// 获取主图收盘价的Global坐标
+func (this *GraphView) GetItemXY(index int) (float64, float64) {
+	util.Assert(this.IsMainGraph, "")
+	util.Assert(index >= 0 && index < this.Data.Count(), "")
+
+	r := this.Data.Get(index)
+
+	close := r.GetClose()
+	x := (this.XScaleTransformer.To(float64(index)) + this.XScaleTransformer.To(float64(index+1))) / 2
+	y := this.YScaleTransformer.To(float64(close))
+
+	pt := core.NewQPointF3(x, y)
+	ptGlobal := this.MapToGlobal(this.MapFromScene(pt))
+
+	return float64(ptGlobal.X()), float64(ptGlobal.Y())
 }
 
 func (this *GraphView) SetVisibleRange(lastVisibleIndex int, visibleCount int) {
@@ -435,11 +471,19 @@ func (this *GraphView) SetController(controller Controller) {
 	this.Controller = controller
 }
 
-func (this *GraphView) TrackPoint(x float64, y float64) {
-	pt := this.MapFromGlobal(core.NewQPoint2(int(x), int(y)))
-	pt1 := this.MapToScene(pt)
+func (this *GraphView) TrackPoint(currentIndex int, x float64, y float64) {
+	if currentIndex < this.FirstVisibleIndex {
+		this.LastVisibleIndex -= (this.FirstVisibleIndex - currentIndex)
+		this.Layout()
+	} else if currentIndex > this.LastVisibleIndex {
+		this.LastVisibleIndex = currentIndex
+		this.Layout()
+	}
 
-	this.TrackLine.UpdateTrackLine(pt1.X(), pt1.Y())
+	pt := this.MapFromGlobal(core.NewQPoint2(int(x), int(y)))
+	ptScene := this.MapToScene(pt)
+
+	this.TrackLine.UpdateTrackLine(ptScene.X(), ptScene.Y())
 	this.isTracking = true
 }
 
