@@ -8,7 +8,7 @@ import (
 )
 
 type SeparatorModelListener interface {
-	OnModelChanged()
+	OnModelChanged(yMin float64, yMax float64)
 }
 
 type SeparatorModel struct {
@@ -60,9 +60,9 @@ func (this *SeparatorModel) RemoveListener(listener SeparatorModelListener) {
 	}
 }
 
-func (this *SeparatorModel) NotifyDataChanged() {
+func (this *SeparatorModel) NotifyDataChanged(yMin float64, yMax float64) {
 	for _, listener := range this.listeners {
-		listener.OnModelChanged()
+		listener.OnModelChanged(yMin, yMax)
 	}
 }
 

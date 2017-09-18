@@ -88,6 +88,8 @@ type GraphView struct {
 	PressedPoint *core.QPointF
 
 	yMax, yMin float64
+
+	yValue float64										// 当前Y值
 }
 
 func CreateGraphView(isMain bool, decorator *GraphViewDecorator, parent widgets.QWidget_ITF) *GraphView {
@@ -108,6 +110,10 @@ func CreateGraphView(isMain bool, decorator *GraphViewDecorator, parent widgets.
 	this.TrackLine = trackline.NewTrackLine(this.Scene())
 	this.SelectRect = selectrect.NewSelectRect(this.Scene())
 	this.SeparatorGraph = separatorgraph.NewSeparatorGraph(this.Scene(), this.YScaleTransformer, this.SeparatorModel)
+
+	// 设置YDecorator
+	this.Decorator.YDecorator().SetModel(this.SeparatorModel)
+	this.Decorator.YDecorator().SetTransformer(this.YScaleTransformer)
 
 	return this
 }
@@ -295,9 +301,9 @@ func (this *GraphView) UpdateUI() {
 	// 更新Separator lines，此时Scene的宽度已经确定
 
 	this.SeparatorModel.Update(this.yMin, this.yMax, float64(this.Height() - 2 * V_MARGIN))
-	this.SeparatorModel.NotifyDataChanged()
+	this.SeparatorModel.NotifyDataChanged(this.yMin, this.yMax)
 
-	this.Scene().Update2(xCenter - float64(this.Width()) / 2, yMin, float64(this.Width()), float64(this.Height()))
+	this.Scene().Update(this.Scene().SceneRect())
 }
 
 func (this *GraphView) Layout() {
@@ -362,6 +368,12 @@ func (this *GraphView) Layout() {
 	this.UpdateUI()
 }
 
+func (this *GraphView) updateYDecorator() {
+	if this.Decorator != nil {
+		this.Decorator.YDecorator().ShowValue(this.yValue)
+	}
+}
+
 // StackedWidget method
 func (this *GraphView) SetMainWindow(window *mainwindow.MainWindow) {
 	this.MainWindow = window
@@ -409,6 +421,10 @@ func (this *GraphView) MouseDoubleClickEvent(event *gui.QMouseEvent) {
 }
 
 func (this *GraphView) MouseMoveEvent(event *gui.QMouseEvent) {
+	ptScene := this.MapToScene(event.Pos())
+	this.yValue = this.YScaleTransformer.From(ptScene.Y())
+	this.updateYDecorator()
+
 	if this.isTracking {
 		if this.Controller != nil {
 			ptScene := this.MapToScene(event.Pos())
@@ -544,6 +560,9 @@ func (this *GraphView) TrackPoint(currentIndex int, x float64, y float64) {
 
 	this.TrackLine.UpdateTrackLine(ptScene.X(), ptScene.Y())
 	this.isTracking = true
+
+	this.yValue = this.YScaleTransformer.From(ptScene.Y())
+	this.updateYDecorator()
 }
 
 func (this *GraphView) CompleteTrackPoint() {

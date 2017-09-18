@@ -51,6 +51,6 @@ func (this *SeparatorGraph) Clear() {
 	this.items = nil
 }
 
-func (this *SeparatorGraph) OnModelChanged() {
+func (this *SeparatorGraph) OnModelChanged(yMin float64, yMax float64) {
 	this.buildLines()
 }

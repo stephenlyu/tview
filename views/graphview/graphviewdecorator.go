@@ -12,6 +12,8 @@ type GraphViewDecorator struct {
 	uigen.UIGraphViewDecorator
 
 	graphView *GraphView
+
+	yDecorator *YDecorator
 }
 
 func CreateGraphViewDecorator(isMain bool, parent widgets.QWidget_ITF) *GraphViewDecorator {
@@ -22,6 +24,10 @@ func CreateGraphViewDecorator(isMain bool, parent widgets.QWidget_ITF) *GraphVie
 }
 
 func (this *GraphViewDecorator) init(isMain bool) {
+	this.yDecorator = CreateYDecorator(this)
+	this.YAxisLayout.AddWidget(this.yDecorator, 0, 0)
+	this.yDecorator.SetStyleSheet("background-color: black;")
+
 	this.graphView = CreateGraphView(isMain, this, this)
 	this.ContentLayout.AddWidget(this.graphView, 0, 0)
 	this.SetStyleSheet("GraphViewDecorator{background-color: black;}")
@@ -29,4 +35,8 @@ func (this *GraphViewDecorator) init(isMain bool) {
 
 func (this *GraphViewDecorator) GraphView() *GraphView {
 	return this.graphView
+}
+
+func (this *GraphViewDecorator) YDecorator() *YDecorator {
+	return this.yDecorator
 }

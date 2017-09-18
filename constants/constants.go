@@ -32,9 +32,16 @@ var (
 	TRACK_LINE_COLOR = gui.NewQColor3(255, 255, 255, 0x9F)
 	SELECT_RECT_COLOR = gui.NewQColor3(255, 255, 255, 0x9F)
 	SEPARATOR_LINE_COLOR = gui.NewQColor3(255, 0, 0, 0x9F)
+	DECORATOR_TEXT_COLOR = gui.NewQColor3(255, 0, 0, 255)
+	VALUE_GRAPH_BG_COLOR = gui.NewQColor3(0, 0, 111, 255)
 )
 
 const (
 	SEPARATOR_GAP_MIN = 30
 	SEPARATOR_MAX = 6
+)
+
+const (
+	Y_TICK_WIDTH = 4
+	X_TICK_HEIGHT = 4
 )
