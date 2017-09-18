@@ -50,19 +50,24 @@ func CreateGraphViewContainer(parent widgets.QWidget_ITF) *GraphViewContainer {
 	return ret
 }
 
+func (this *GraphViewContainer) createGraphView(isMain bool) *GraphView {
+	decorator := CreateGraphViewDecorator(isMain, this)
+	graphView := decorator.GraphView()
+	this.AddWidget(decorator)
+	return graphView
+}
+
 func (this *GraphViewContainer) init() {
 	this.visibleIndices = make(map[int]bool)
 	this.graphViews = make([]*GraphView, MAX_SECONDARY_GRAPHS + 1)
 
-	graphView := CreateGraphView(true, this)
-	this.AddWidget(graphView)
+	graphView := this.createGraphView(true)
 	this.SetStretchFactor(0, 3)
 
 	this.graphViews[0] = graphView
 
 	for i := 0; i < MAX_SECONDARY_GRAPHS; i++ {
-		graphView := CreateGraphView(false, this)
-		this.AddWidget(graphView)
+		graphView := this.createGraphView(false)
 		this.SetStretchFactor(i + 1, 1)
 		this.graphViews[i + 1] = graphView
 	}
@@ -91,12 +96,12 @@ func (this *GraphViewContainer) SetMainWindow(window *mainwindow.MainWindow) {
 // UI Control routines
 
 func (this *GraphViewContainer) ShowGraph(index int) {
-	this.graphViews[index].Show()
+	this.graphViews[index].Decorator.Show()
 	this.visibleIndices[index] = true
 }
 
 func (this *GraphViewContainer) HideGraph(index int) {
-	this.graphViews[index].Hide()
+	this.graphViews[index].Decorator.Hide()
 	this.visibleIndices[index] = false
 }
 

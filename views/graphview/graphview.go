@@ -44,6 +44,7 @@ type Controller interface {
 type GraphView struct {
 	widgets.QGraphicsView
 	MainWindow *mainwindow.MainWindow
+	Decorator *GraphViewDecorator
 
 	// Coordinate transformers
 
@@ -89,9 +90,10 @@ type GraphView struct {
 	yMax, yMin float64
 }
 
-func CreateGraphView(isMain bool, parent widgets.QWidget_ITF) *GraphView {
+func CreateGraphView(isMain bool, decorator *GraphViewDecorator, parent widgets.QWidget_ITF) *GraphView {
 	this := NewGraphView(parent)
 	this.SetMouseTracking(true)
+	this.Decorator = decorator
 	this.IsMainGraph = isMain
 	this.Models = make(map[string]model.Model)
 	this.SeparatorModel = model.NewSeparatorModel()

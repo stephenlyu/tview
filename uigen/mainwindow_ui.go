@@ -2,8 +2,8 @@
 package uigen
 
 import (
-	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
+	"github.com/therecipe/qt/core"
 )
 
 type UIMainwindowMainWindow struct {
