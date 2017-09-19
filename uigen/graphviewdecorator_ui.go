@@ -9,7 +9,10 @@ import (
 type UIGraphViewDecorator struct {
 	VerticalLayout *widgets.QVBoxLayout
 	Widget *widgets.QWidget
+	Layout1 *widgets.QHBoxLayout
+	Widget5 *widgets.QWidget
 	InfoLayout *widgets.QHBoxLayout
+	HorizontalSpacer *widgets.QSpacerItem
 	Widget2 *widgets.QWidget
 	HorizontalLayout *widgets.QHBoxLayout
 	Widget3 *widgets.QWidget
@@ -21,6 +24,7 @@ type UIGraphViewDecorator struct {
 func (this *UIGraphViewDecorator) SetupUI(GraphViewDecorator *widgets.QWidget) {
 	GraphViewDecorator.SetObjectName("GraphViewDecorator")
 	GraphViewDecorator.SetGeometry(core.NewQRect4(0, 0, 993, 580))
+	GraphViewDecorator.SetStyleSheet("")
 	this.VerticalLayout = widgets.NewQVBoxLayout2(GraphViewDecorator)
 	this.VerticalLayout.SetObjectName("verticalLayout")
 	this.VerticalLayout.SetContentsMargins(0, 0, 0, 0)
@@ -28,10 +32,20 @@ func (this *UIGraphViewDecorator) SetupUI(GraphViewDecorator *widgets.QWidget) {
 	this.Widget = widgets.NewQWidget(GraphViewDecorator, core.Qt__Widget)
 	this.Widget.SetObjectName("Widget")
 	this.Widget.SetMinimumSize(core.NewQSize2(0, 30))
-	this.InfoLayout = widgets.NewQHBoxLayout2(this.Widget)
+	this.Layout1 = widgets.NewQHBoxLayout2(this.Widget)
+	this.Layout1.SetObjectName("layout1")
+	this.Layout1.SetContentsMargins(0, 0, 0, 0)
+	this.Layout1.SetSpacing(0)
+	this.Widget5 = widgets.NewQWidget(this.Widget, core.Qt__Widget)
+	this.Widget5.SetObjectName("Widget5")
+	this.Widget5.SetStyleSheet("background-color: black; color: white;")
+	this.InfoLayout = widgets.NewQHBoxLayout2(this.Widget5)
 	this.InfoLayout.SetObjectName("infoLayout")
 	this.InfoLayout.SetContentsMargins(0, 0, 0, 0)
 	this.InfoLayout.SetSpacing(0)
+	this.HorizontalSpacer = widgets.NewQSpacerItem(40, 20, widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Minimum)
+	this.InfoLayout.AddItem(this.HorizontalSpacer)
+	this.Layout1.AddWidget(this.Widget5, 0, 0)
 	this.VerticalLayout.AddWidget(this.Widget, 0, 0)
 	this.Widget2 = widgets.NewQWidget(GraphViewDecorator, core.Qt__Widget)
 	this.Widget2.SetObjectName("Widget2")

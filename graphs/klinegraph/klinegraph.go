@@ -6,6 +6,7 @@ import (
 	"github.com/stephenlyu/tview/constants"
 	"github.com/stephenlyu/tview/transform"
 	"github.com/therecipe/qt/widgets"
+	"github.com/stephenlyu/tview/graphs"
 )
 
 type KLineGraph struct {
@@ -150,4 +151,7 @@ func (this *KLineGraph) Clear() {
 		this.Scene.RemoveItem(item.Item)
 	}
 	this.KLines = make(map[int]*KLineItem)
+}
+
+func (this *KLineGraph) ShowInfo(index int, display graphs.InfoDisplay) {
 }

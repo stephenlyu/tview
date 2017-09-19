@@ -9,6 +9,8 @@ import (
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/goformula/function"
 	"github.com/therecipe/qt/core"
+	"github.com/stephenlyu/tview/graphs"
+	"fmt"
 )
 
 type LineGraph struct {
@@ -157,4 +159,13 @@ func (this *LineGraph) Clear() {
 		this.Scene.RemoveItem(this.PathItem)
 		this.PathItem = nil
 	}
+}
+
+func (this *LineGraph) ShowInfo(index int, display graphs.InfoDisplay) {
+	if index < 0 || index >= this.Model.Count() {
+		return
+	}
+
+	v := this.Model.GetRaw(index)[this.ValueIndex]
+	display.Add(fmt.Sprintf("%.02f", v), this.color)
 }

@@ -8,12 +8,14 @@ import (
 	"github.com/stephenlyu/tview/constants"
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/tview/graphs"
+	"fmt"
 )
 
 
 type StickGraph struct {
 	Model model.Model
 	ValueIndex int
+	Color *gui.QColor
 	Scene *widgets.QGraphicsScene
 	xTransformer transform.ScaleTransformer
 
@@ -22,7 +24,7 @@ type StickGraph struct {
 	Lines map[int]*widgets.QGraphicsPathItem
 }
 
-func NewStickGraph(model model.Model, valueIndex int, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *StickGraph {
+func NewStickGraph(model model.Model, valueIndex int, color *gui.QColor, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *StickGraph {
 	util.Assert(model != nil, "model != nil")
 	util.Assert(len(model.GetGraphTypes()) > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
 	util.Assert(model.GetGraphTypes()[valueIndex] == constants.GraphTypeStick, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeStick")
@@ -30,6 +32,7 @@ func NewStickGraph(model model.Model, valueIndex int, scene *widgets.QGraphicsSc
 	this := &StickGraph{
 		Model: model,
 		ValueIndex: valueIndex,
+		Color: color,
 		Scene: scene,
 		xTransformer: xTransformer,
 		Lines: make(map[int]*widgets.QGraphicsPathItem),
@@ -185,4 +188,13 @@ func (this *StickGraph) Clear() {
 	}
 
 	this.Lines = make(map[int]*widgets.QGraphicsPathItem)
+}
+
+func (this *StickGraph) ShowInfo(index int, display graphs.InfoDisplay) {
+	if index < 0 || index >= this.Model.Count() {
+		return
+	}
+
+	v := this.Model.GetRaw(index)[this.ValueIndex]
+	display.Add(fmt.Sprintf("%.02f", v), this.Color)
 }

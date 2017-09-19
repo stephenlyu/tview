@@ -9,12 +9,14 @@ import (
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/tview/graphs"
 	"github.com/therecipe/qt/core"
+	"fmt"
 )
 
 
 type VolStickGraph struct {
 	Model model.Model
 	KLineModel model.Model
+	Color *gui.QColor
 	ValueIndex int
 	Scene *widgets.QGraphicsScene
 	xTransformer transform.ScaleTransformer
@@ -23,7 +25,7 @@ type VolStickGraph struct {
 	Lines map[int]*widgets.QGraphicsPathItem
 }
 
-func NewVolStickGraph(model model.Model, valueIndex int, klineModel model.Model, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *VolStickGraph {
+func NewVolStickGraph(model model.Model, valueIndex int, color *gui.QColor, klineModel model.Model, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *VolStickGraph {
 	util.Assert(model != nil, "model != nil")
 	util.Assert(len(model.GetGraphTypes()) > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
 	util.Assert(model.GetGraphTypes()[valueIndex] == constants.GraphTypeVolStick, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeVolStick")
@@ -31,6 +33,7 @@ func NewVolStickGraph(model model.Model, valueIndex int, klineModel model.Model,
 	this := &VolStickGraph{
 		Model: model,
 		KLineModel: klineModel,
+		Color: color,
 		ValueIndex: valueIndex,
 		Scene: scene,
 		xTransformer: xTransformer,
@@ -180,4 +183,13 @@ func (this *VolStickGraph) Clear() {
 		this.Scene.RemoveItem(item)
 	}
 	this.Lines = make(map[int]*widgets.QGraphicsPathItem)
+}
+
+func (this *VolStickGraph) ShowInfo(index int, display graphs.InfoDisplay) {
+	if index < 0 || index >= this.Model.Count() {
+		return
+	}
+
+	v := this.Model.GetRaw(index)[this.ValueIndex]
+	display.Add(fmt.Sprintf("%.0f", v), this.Color)
 }

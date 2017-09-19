@@ -40,15 +40,15 @@ func (this *FormulaGraph) init() {
 	j := 0
 	for i, graphType := range graphTypes {
 		var graph graphs.Graph
+		color := graphs.COLORS[j % len(graphs.COLORS)]
+		j++
 		switch graphType {
 		case constants.GraphTypeLine:
-			color := graphs.COLORS[j % len(graphs.COLORS)]
-			j++
 			graph = linegraph.NewLineGraph(this.Model, i, color, this.Scene, this.xTransformer)
 		case constants.GraphTypeStick:
-			graph = stickgraph.NewStickGraph(this.Model, i, this.Scene, this.xTransformer)
+			graph = stickgraph.NewStickGraph(this.Model, i, color, this.Scene, this.xTransformer)
 		case constants.GraphTypeVolStick:
-			graph = volgraph.NewVolStickGraph(this.Model, i, this.KLineModel, this.Scene, this.xTransformer)
+			graph = volgraph.NewVolStickGraph(this.Model, i, color, this.KLineModel, this.Scene, this.xTransformer)
 		}
 		this.graphs[i] = graph
 	}
@@ -81,5 +81,11 @@ func (this *FormulaGraph) Update(startIndex int, endIndex int) {
 func (this *FormulaGraph) Clear() {
 	for _, graph := range this.graphs {
 		graph.Clear()
+	}
+}
+
+func (this *FormulaGraph) ShowInfo(index int, display graphs.InfoDisplay) {
+	for _, graph := range this.graphs {
+		graph.ShowInfo(index, display)
 	}
 }

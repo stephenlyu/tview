@@ -83,6 +83,7 @@ type GraphView struct {
 	FirstVisibleIndex, LastVisibleIndex int
 	ItemWidth float64									// 每个数据占用的屏幕宽度
 
+	currentIndex int
 	isTracking bool
 
 	PressedPoint *core.QPointF
@@ -97,6 +98,7 @@ func CreateGraphView(isMain bool, decorator *GraphViewDecorator, parent widgets.
 	this.SetMouseTracking(true)
 	this.Decorator = decorator
 	this.IsMainGraph = isMain
+	this.currentIndex = -1
 	this.Models = make(map[string]model.Model)
 	this.SeparatorModel = model.NewSeparatorModel()
 	this.Graphs = make(map[string]graphs.Graph)
@@ -154,6 +156,7 @@ func (this *GraphView) reset() {
 	this.ItemWidth = 0
 	this.FirstVisibleIndex = 0
 	this.LastVisibleIndex = 0
+	this.currentIndex = -1
 	this.yMax = 0
 	this.yMin = 0
 }
@@ -304,6 +307,8 @@ func (this *GraphView) UpdateUI() {
 	this.SeparatorModel.NotifyDataChanged(this.yMin, this.yMax)
 
 	this.Scene().Update(this.Scene().SceneRect())
+
+	this.updateTopDecorator()
 }
 
 func (this *GraphView) Layout() {
@@ -371,6 +376,19 @@ func (this *GraphView) Layout() {
 func (this *GraphView) updateYDecorator() {
 	if this.Decorator != nil {
 		this.Decorator.YDecorator().ShowValue(this.yValue)
+	}
+}
+
+func (this *GraphView) updateTopDecorator() {
+	if this.Decorator != nil {
+		this.Decorator.topDecorator.Clear()
+		index := this.currentIndex
+		if index < 0 {
+			index = this.LastVisibleIndex
+		}
+		for _, graph := range this.Graphs {
+			graph.ShowInfo(index, this.Decorator.TopDecorator())
+		}
 	}
 }
 
@@ -563,9 +581,15 @@ func (this *GraphView) TrackPoint(currentIndex int, x float64, y float64) {
 
 	this.yValue = this.YScaleTransformer.From(ptScene.Y())
 	this.updateYDecorator()
+
+	this.currentIndex = currentIndex
+	this.updateTopDecorator()
 }
 
 func (this *GraphView) CompleteTrackPoint() {
 	this.TrackLine.Clear()
 	this.isTracking = false
+
+	this.currentIndex = -1
+	this.updateTopDecorator()
 }
