@@ -106,7 +106,7 @@ func (this *LineGraph) buildLine() {
 		values := this.Model.Get(i)
 		v := values[this.ValueIndex]
 
-		if v == function.NaN {
+		if function.IsNaN(v) {
 			needMove = true
 			continue
 		}
