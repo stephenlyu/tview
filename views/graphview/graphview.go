@@ -265,10 +265,10 @@ func (this *GraphView) init() {
 	this.SetDragMode(widgets.QGraphicsView__NoDrag)
 	this.SetAlignment(core.Qt__AlignLeft)
 	this.Scale(1, -1)
+	this.SetStyleSheet("background-color: black;")
 
 	// 设置scene
 	scene := widgets.NewQGraphicsScene(this)
-	scene.SetBackgroundBrush(gui.NewQBrush4(core.Qt__black, core.Qt__SolidPattern))
 	this.SetScene(scene)
 
 	this.connectEvents()

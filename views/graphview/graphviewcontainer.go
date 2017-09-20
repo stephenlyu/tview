@@ -41,10 +41,9 @@ func CreateGraphViewContainer(parent widgets.QWidget_ITF) *GraphViewContainer {
 	ret := NewGraphViewContainer(parent)
 	ret.currentIndex = -1
 	ret.SetOrientation(core.Qt__Vertical)
-	ret.SetStyleSheet("QGraphicsView { background-color: black; }")
 	ret.SetOpaqueResize(false)
-	ret.SetHandleWidth(0)
-	ret.SetStyleSheet("QSplitter::handle { background-color: black }")
+	ret.SetHandleWidth(1)
+	ret.SetStyleSheet("QSplitter::handle { background-color: gray; }")
 
 	ret.init()
 	return ret
