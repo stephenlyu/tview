@@ -115,7 +115,7 @@ func (this *StickGraph) ensureItem(i int) *widgets.QGraphicsPathItem {
 }
 
 func (this *StickGraph) updateStick(i int, item *widgets.QGraphicsPathItem) {
-	x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 2))) / 2
+	x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 1))) / 2
 	y := this.Model.Get(i)[this.ValueIndex]
 
 	path := gui.NewQPainterPath()

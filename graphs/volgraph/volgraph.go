@@ -116,7 +116,7 @@ func (this *VolStickGraph) ensureItem(i int) *widgets.QGraphicsPathItem {
 }
 
 func (this *VolStickGraph) updateStick(i int, item *widgets.QGraphicsPathItem) {
-	x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 2))) / 2
+	x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 1))) / 2
 	w := this.xTransformer.To(1) / 3
 	values := this.Model.Get(i)
 	y := values[this.ValueIndex]

@@ -61,12 +61,14 @@ func (this *GraphViewContainer) init() {
 	this.graphViews = make([]*GraphView, MAX_SECONDARY_GRAPHS + 1)
 
 	graphView := this.createGraphView(true)
+	graphView.SetName("MainGraphView")
 	this.SetStretchFactor(0, 3)
 
 	this.graphViews[0] = graphView
 
 	for i := 0; i < MAX_SECONDARY_GRAPHS; i++ {
 		graphView := this.createGraphView(false)
+		graphView.SetName(fmt.Sprintf("SecondaryGraphView%d", i + 1))
 		this.SetStretchFactor(i + 1, 1)
 		this.graphViews[i + 1] = graphView
 	}
