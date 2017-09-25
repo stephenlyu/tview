@@ -53,6 +53,10 @@ func (this *KLineModel) Get(index int) []float64 {
 	return values
 }
 
+func (this *KLineModel) GetNames() []string {
+	return []string{"OPEN", "CLOSE", "HIGH", "LOW"}
+}
+
 func (this *KLineModel) GetGraphTypes() []constants.GraphType {
 	return []constants.GraphType{constants.GraphTypeKLine}
 }

@@ -63,7 +63,7 @@
         </property>
         <layout class="QHBoxLayout" name="infoLayout">
          <property name="spacing">
-          <number>0</number>
+          <number>5</number>
          </property>
          <property name="leftMargin">
           <number>0</number>

@@ -91,6 +91,8 @@ type GraphView struct {
 	yMax, yMin float64
 
 	yValue float64										// 当前Y值
+
+	name string
 }
 
 func CreateGraphView(isMain bool, decorator *GraphViewDecorator, parent widgets.QWidget_ITF) *GraphView {
@@ -136,6 +138,10 @@ func (this *GraphView) SetLogCoordinate(flag bool) {
 	}
 
 	this.UpdateUI()
+}
+
+func (this *GraphView) SetName(name string) {
+	this.name = name
 }
 
 // Data & Model routines

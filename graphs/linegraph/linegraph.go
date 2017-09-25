@@ -106,7 +106,7 @@ func (this *LineGraph) buildLine() {
 		values := this.Model.Get(i)
 		v := values[this.ValueIndex]
 
-		if v == function.NaN {
+		if function.IsNaN(v) {
 			needMove = true
 			continue
 		}
@@ -166,6 +166,8 @@ func (this *LineGraph) ShowInfo(index int, display graphs.InfoDisplay) {
 		return
 	}
 
+	name := this.Model.GetNames()[this.ValueIndex]
 	v := this.Model.GetRaw(index)[this.ValueIndex]
-	display.Add(fmt.Sprintf("%.02f", v), this.color)
+
+	display.Add(fmt.Sprintf("%s: %.02f", name, v), this.color)
 }

@@ -15,6 +15,7 @@ type Model interface {
 	Get(index int) []float64					// Get record at index
 	GetRaw(index int) []float64					// Get un-scaled record at index
 	GetGraphTypes() []constants.GraphType		// Get graph types of this model
+	GetNames() []string
 
 	SetValueTransformer(transformer transform.Transformer)
 	SetScaleTransformer(transformer transform.ScaleTransformer)

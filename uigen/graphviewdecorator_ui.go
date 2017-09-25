@@ -42,7 +42,7 @@ func (this *UIGraphViewDecorator) SetupUI(GraphViewDecorator *widgets.QWidget) {
 	this.InfoLayout = widgets.NewQHBoxLayout2(this.Widget5)
 	this.InfoLayout.SetObjectName("infoLayout")
 	this.InfoLayout.SetContentsMargins(0, 0, 0, 0)
-	this.InfoLayout.SetSpacing(0)
+	this.InfoLayout.SetSpacing(5)
 	this.HorizontalSpacer = widgets.NewQSpacerItem(40, 20, widgets.QSizePolicy__Expanding, widgets.QSizePolicy__Minimum)
 	this.InfoLayout.AddItem(this.HorizontalSpacer)
 	this.Layout1.AddWidget(this.Widget5, 0, 0)

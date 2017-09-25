@@ -10,6 +10,7 @@ import (
 	"github.com/stephenlyu/tview/graphs/linegraph"
 	"github.com/stephenlyu/tview/graphs/stickgraph"
 	"github.com/stephenlyu/tview/graphs/volgraph"
+	"github.com/therecipe/qt/gui"
 )
 
 type FormulaGraph struct {
@@ -85,6 +86,8 @@ func (this *FormulaGraph) Clear() {
 }
 
 func (this *FormulaGraph) ShowInfo(index int, display graphs.InfoDisplay) {
+	formulaModel := this.Model.(*model.FormulaModel)
+	display.Add(formulaModel.Formula.Name(), gui.NewQColor3(255, 255, 255, 255))
 	for _, graph := range this.graphs {
 		graph.ShowInfo(index, display)
 	}

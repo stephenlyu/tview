@@ -8,12 +8,20 @@ import (
 type FormulaModel struct {
 	BaseModel
 
+	varNames []string
+
 	graphTypes []constants.GraphType
 	Formula formula.Formula
 }
 
 func NewFormulaModel(f formula.Formula, graphTypes []constants.GraphType) *FormulaModel {
+	varNames := make([]string, f.VarCount())
+	for i := 0; i < f.VarCount(); i++ {
+		varNames[i] = f.VarName(i)
+	}
+
 	return &FormulaModel{
+		varNames: varNames,
 		graphTypes: graphTypes,
 		Formula: f,
 	}
@@ -49,6 +57,10 @@ func (this *FormulaModel) Get(index int) []float64 {
 	}
 
 	return values
+}
+
+func (this *FormulaModel) GetNames() []string {
+	return this.varNames
 }
 
 func (this *FormulaModel) GetGraphTypes() []constants.GraphType {
