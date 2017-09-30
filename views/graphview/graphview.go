@@ -39,6 +39,8 @@ type Controller interface {
 
 	TrackPoint(currentIndex int, x float64, y float64)
 	CompleteTrackPoint()
+
+	TrackXY(globalX float64, globalY float64)
 }
 
 //go:generate qtmoc
@@ -452,6 +454,9 @@ func (this *GraphView) MouseMoveEvent(event *gui.QMouseEvent) {
 	ptScene := this.MapToScene(event.Pos())
 	this.yValue = this.YScaleTransformer.From(ptScene.Y())
 	this.updateYDecorator()
+	if this.Controller != nil {
+		this.Controller.TrackXY(float64(event.GlobalX()), float64(event.GlobalY()))
+	}
 
 	if this.isTracking {
 		if this.Controller != nil {

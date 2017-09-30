@@ -256,6 +256,21 @@ func (this *XDecorator) TrackPoint(currentIndex int, x float64, y float64) {
 	this.ShowValue(currentIndex)
 }
 
+func (this *XDecorator) TrackXY(globalX float64, globalY float64) {
+	pt := core.NewQPoint2(int(globalX), int(globalY))
+	pt = this.MapFromGlobal(pt)
+	ptScene := this.MapToScene(pt)
+	currentIndex := int(this.Transformer.From(ptScene.X()))
+	if currentIndex >= this.Data.Count() {
+		currentIndex = this.Data.Count() - 1
+	}
+
+	if currentIndex < 0 {
+		currentIndex = 0
+	}
+	this.ShowValue(currentIndex)
+}
+
 func (this *XDecorator) CompleteTrackPoint() {
 	this.HideValue()
 }

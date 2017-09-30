@@ -248,6 +248,10 @@ func (this *GraphViewContainer) TrackPoint(currentIndex int, x float64, y float6
 	this.xBar.TrackPoint(currentIndex, x, y)
 }
 
+func (this *GraphViewContainer) TrackXY(globalX float64, globalY float64) {
+	this.xBar.TrackXY(globalX, globalY)
+}
+
 func (this *GraphViewContainer) CompleteTrackPoint() {
 	fmt.Println("GraphViewContainer.CompleteTrackPoint")
 	for _, view := range this.graphViews {
