@@ -6,7 +6,6 @@ import (
 	"github.com/stephenlyu/tview/uigen"
 	"github.com/stephenlyu/tds/period"
 	"github.com/stephenlyu/tds/entity"
-	"fmt"
 )
 
 //go:generate qtmoc
@@ -30,7 +29,6 @@ func CreateXBar(parent widgets.QWidget_ITF) *XBar {
 }
 
 func (this *XBar) SetData(data []entity.Record, p period.Period) {
-	fmt.Println(this.BtnPeriod, p)
 	this.BtnPeriod.SetText(p.DisplayName())
 	this.XDecorator.SetData(data, p)
 }

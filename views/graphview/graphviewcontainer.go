@@ -43,6 +43,7 @@ type GraphViewContainer struct {
 func CreateGraphViewContainer(parent widgets.QWidget_ITF) *GraphViewContainer {
 	ret := NewGraphViewContainer(parent, core.Qt__Widget)
 	ret.currentIndex = -1
+	ret.lastVisibleIndex = -1
 
 	ret.init()
 	return ret
@@ -107,6 +108,8 @@ func (this *GraphViewContainer) init() {
 	for _, view := range this.graphViews {
 		view.SetController(this)
 	}
+
+	this.ConnectResizeEvent(this.ResizeEvent)
 }
 
 // StackedWidget method
@@ -169,8 +172,14 @@ func (this *GraphViewContainer) RemoveGraphFormula(index int, name string, args 
 
 func (this *GraphViewContainer) SetViewVisibleRange() {
 	usableMainWidth := this.graphViews[0].GetUsableWidth()
-	lastVisibleIndex := len(this.data) - 1
+	lastVisibleIndex := this.lastVisibleIndex
+	if lastVisibleIndex < 0 {
+		lastVisibleIndex = len(this.data) - 1
+	}
 	visibleCount := int(usableMainWidth / this.itemWidth)
+	// 确保能够容纳整数根K线
+	this.itemWidth = usableMainWidth / float64(visibleCount)
+
 	for _, view := range this.graphViews {
 		view.SetVisibleRange(lastVisibleIndex, visibleCount)
 	}
@@ -205,6 +214,10 @@ func (this *GraphViewContainer) doZoom(scale float64) {
 	}
 
 	this.itemWidth = itemWidth
+	this.SetViewVisibleRange()
+}
+
+func (this *GraphViewContainer) ResizeEvent(event *gui.QResizeEvent) {
 	this.SetViewVisibleRange()
 }
 
@@ -253,7 +266,6 @@ func (this *GraphViewContainer) TrackXY(globalX float64, globalY float64) {
 }
 
 func (this *GraphViewContainer) CompleteTrackPoint() {
-	fmt.Println("GraphViewContainer.CompleteTrackPoint")
 	for _, view := range this.graphViews {
 		view.CompleteTrackPoint()
 	}

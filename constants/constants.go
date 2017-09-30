@@ -17,7 +17,7 @@ const (
 )
 
 const (
-	H_MARGIN = 10
+	H_MARGIN = 0
 	V_MARGIN = 10
 )
 

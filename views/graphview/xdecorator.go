@@ -75,7 +75,6 @@ func (this *XDecorator) init() {
 	this.ValueGraph = valuegraph.NewValueGraph(this.Scene(), float64(this.Width()), VALUE_GRAPH_HEIGHT)
 
 	this.ConnectWheelEvent(this.WheelEvent)
-	this.ConnectResizeEvent(this.ResizeEvent)
 }
 
 func (this *XDecorator) SetData(data []entity.Record, p period.Period) {
@@ -225,6 +224,10 @@ func (this *XDecorator) Layout() {
 }
 
 func (this *XDecorator) SetVisibleRange(lastVisibleIndex int, visibleCount int) {
+	if this.Data == nil {
+		return
+	}
+
 	if this.Data.Count() == 0 {
 		return
 	}
@@ -287,11 +290,6 @@ func (this *XDecorator) Clear() {
 }
 
 func (this *XDecorator) WheelEvent(event *gui.QWheelEvent) {
-}
-
-// Event Handlers
-func (this *XDecorator) ResizeEvent(event *gui.QResizeEvent) {
-	this.Layout()
 }
 
 func (this *XDecorator) ShowValue(index int) {

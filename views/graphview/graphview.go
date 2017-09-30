@@ -260,7 +260,6 @@ func (this *GraphView) createFormulaGraph(name string) {
 
 func (this *GraphView) connectEvents() {
 	this.ConnectKeyPressEvent(this.KeyPressEvent)
-	this.ConnectResizeEvent(this.ResizeEvent)
 	this.ConnectWheelEvent(this.WheelEvent)
 
 	this.ConnectMousePressEvent(this.MousePressEvent)
@@ -409,11 +408,6 @@ func (this *GraphView) SetMainWindow(window *mainwindow.MainWindow) {
 	this.MainWindow = window
 }
 
-// Event Handlers
-func (this *GraphView) ResizeEvent(event *gui.QResizeEvent) {
-	this.Layout()
-}
-
 func (this *GraphView) KeyPressEvent(event *gui.QKeyEvent) {
 	if this.Controller != nil {
 		if this.Controller.HandleKeyEvent(event) {
@@ -462,12 +456,12 @@ func (this *GraphView) MouseMoveEvent(event *gui.QMouseEvent) {
 		if this.Controller != nil {
 			ptScene := this.MapToScene(event.Pos())
 			currentIndex := int(this.XScaleTransformer.From(ptScene.X()))
-			if currentIndex >= this.Data.Count() {
-				currentIndex = this.Data.Count() - 1
+			if currentIndex > this.LastVisibleIndex {
+				currentIndex = this.LastVisibleIndex
 			}
 
-			if currentIndex < 0 {
-				currentIndex = 0
+			if currentIndex < this.FirstVisibleIndex {
+				currentIndex = this.FirstVisibleIndex
 			}
 			this.Controller.TrackPoint(currentIndex, float64(event.GlobalX()), float64(event.GlobalY()))
 		}
@@ -580,6 +574,9 @@ func (this *GraphView) SetController(controller Controller) {
 }
 
 func (this *GraphView) TrackPoint(currentIndex int, x float64, y float64) {
+	pt := this.MapFromGlobal(core.NewQPoint2(int(x), int(y)))
+	ptScene := this.MapToScene(pt)
+
 	if currentIndex < this.FirstVisibleIndex {
 		this.LastVisibleIndex -= (this.FirstVisibleIndex - currentIndex)
 		this.Layout()
@@ -587,9 +584,6 @@ func (this *GraphView) TrackPoint(currentIndex int, x float64, y float64) {
 		this.LastVisibleIndex = currentIndex
 		this.Layout()
 	}
-
-	pt := this.MapFromGlobal(core.NewQPoint2(int(x), int(y)))
-	ptScene := this.MapToScene(pt)
 
 	this.TrackLine.UpdateTrackLine(ptScene.X(), ptScene.Y())
 	this.isTracking = true
