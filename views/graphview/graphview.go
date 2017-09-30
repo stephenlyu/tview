@@ -13,7 +13,6 @@ import (
 	"github.com/stephenlyu/tview/constants"
 	"github.com/stephenlyu/tview/graphs/formulagraph"
 	"github.com/z-ray/log"
-	"github.com/cznic/mathutil"
 	"github.com/stephenlyu/tview/graphs/trackline"
 	"github.com/stephenlyu/tds/util"
 	"github.com/stephenlyu/tview/graphs/selectrect"
@@ -551,16 +550,13 @@ func (this *GraphView) SetVisibleRange(lastVisibleIndex int, visibleCount int) {
 	if this.Data == nil || this.Data.Count() == 0 {
 		return
 	}
-	if lastVisibleIndex < 0 || lastVisibleIndex >= this.Data.Count() {
+	if lastVisibleIndex < 0 {
 		return
 	}
 
 	if visibleCount <= 0 {
 		return
 	}
-
-	firstVisibleIndex := int(mathutil.MaxInt32(0, int32(lastVisibleIndex - visibleCount + 1)))
-	visibleCount = lastVisibleIndex - firstVisibleIndex + 1
 
 	this.LastVisibleIndex = lastVisibleIndex
 	usableWidth := float64(this.Width()) - 2 * H_MARGIN

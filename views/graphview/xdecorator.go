@@ -8,7 +8,6 @@ import (
 	"github.com/therecipe/qt/core"
 	"github.com/stephenlyu/tview/constants"
 	"github.com/stephenlyu/tview/graphs/valuegraph"
-	"github.com/cznic/mathutil"
 	"github.com/stephenlyu/tds/period"
 	"github.com/stephenlyu/tds/date"
 	"fmt"
@@ -231,16 +230,13 @@ func (this *XDecorator) SetVisibleRange(lastVisibleIndex int, visibleCount int) 
 	if this.Data.Count() == 0 {
 		return
 	}
-	if lastVisibleIndex < 0 || lastVisibleIndex >= this.Data.Count() {
+	if lastVisibleIndex < 0 {
 		return
 	}
 
 	if visibleCount <= 0 {
 		return
 	}
-
-	firstVisibleIndex := int(mathutil.MaxInt32(0, int32(lastVisibleIndex - visibleCount + 1)))
-	visibleCount = lastVisibleIndex - firstVisibleIndex + 1
 
 	this.LastVisibleIndex = lastVisibleIndex
 	usableWidth := float64(this.Width()) - 2 * H_MARGIN

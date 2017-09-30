@@ -30,6 +30,7 @@ type GraphViewContainer struct {
 
 	itemWidth float64
 	lastVisibleIndex int
+	firstVisibleIndex int
 	visibleCount int
 
 	// Data & Model
@@ -177,6 +178,13 @@ func (this *GraphViewContainer) SetViewVisibleRange() {
 		lastVisibleIndex = len(this.data) - 1
 	}
 	visibleCount := int(usableMainWidth / this.itemWidth)
+	if lastVisibleIndex < visibleCount {
+		lastVisibleIndex = visibleCount
+	}
+	if lastVisibleIndex >= len(this.data) {
+		lastVisibleIndex = len(this.data) - 1
+	}
+
 	// 确保能够容纳整数根K线
 	this.itemWidth = usableMainWidth / float64(visibleCount)
 
@@ -185,6 +193,10 @@ func (this *GraphViewContainer) SetViewVisibleRange() {
 	}
 	this.xBar.SetVisibleRange(lastVisibleIndex, visibleCount)
 	this.lastVisibleIndex = lastVisibleIndex
+	this.firstVisibleIndex = lastVisibleIndex - visibleCount
+	if this.firstVisibleIndex < 0 {
+		this.firstVisibleIndex = 0
+	}
 }
 
 func (this *GraphViewContainer) doZoom(scale float64) {
@@ -228,20 +240,20 @@ func (this *GraphViewContainer) HandleKeyEvent(event *gui.QKeyEvent) bool {
 	} else if key == core.Qt__Key_Down {
 		this.doZoom(1 / constants.ZOOM_OUT)
 	} else if key == core.Qt__Key_Left {
-		if this.currentIndex < 0 {
-			x, y := this.graphViews[0].GetItemXY(this.lastVisibleIndex)
-			this.TrackPoint(this.lastVisibleIndex, x, y)
-		} else if this.currentIndex > 0 {
+		if this.currentIndex > 0 {
 			x, y := this.graphViews[0].GetItemXY(this.currentIndex - 1)
 			this.TrackPoint(this.currentIndex - 1, x, y)
+			if this.currentIndex - 1 < this.firstVisibleIndex {
+				this.firstVisibleIndex = this.currentIndex - 1
+			}
 		}
 	} else if key == core.Qt__Key_Right {
-		if this.currentIndex < 0 {
-			x, y := this.graphViews[0].GetItemXY(this.lastVisibleIndex)
-			this.TrackPoint(this.lastVisibleIndex, x, y)
-		} else if this.currentIndex < len(this.data) - 1 {
+		if this.currentIndex < len(this.data) - 1 {
 			x, y := this.graphViews[0].GetItemXY(this.currentIndex + 1)
 			this.TrackPoint(this.currentIndex + 1, x, y)
+			if this.currentIndex + 1 > this.lastVisibleIndex {
+				this.lastVisibleIndex = this.currentIndex + 1
+			}
 		}
 	}
 	return false
