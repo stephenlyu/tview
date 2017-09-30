@@ -18,6 +18,7 @@ import (
 	"github.com/stephenlyu/tds/util"
 	"github.com/stephenlyu/tview/graphs/selectrect"
 	"github.com/stephenlyu/tview/graphs/separatorgraph"
+	"github.com/stephenlyu/tds/period"
 )
 
 const (
@@ -55,6 +56,7 @@ type GraphView struct {
 	// Data
 
 	Data *model.Data
+	Period period.Period
 
 	// Models
 
@@ -156,6 +158,7 @@ func (this *GraphView) reset() {
 
 	// Clear data & models
 	this.Data = nil
+	this.Period = nil
 	this.Models = make(map[string]model.Model)
 
 	// Reset State
@@ -172,9 +175,10 @@ func (this *GraphView) setModelTransformers(model model.Model) {
 	model.SetScaleTransformer(this.YScaleTransformer)
 }
 
-func (this *GraphView) SetData(data []entity.Record) {
+func (this *GraphView) SetData(data []entity.Record, p period.Period) {
 	this.reset()
 	this.Data = model.NewData(data)
+	this.Period = p
 
 	klineModel := model.NewKLineModel(this.Data)
 	this.setModelTransformers(klineModel)

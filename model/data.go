@@ -44,3 +44,11 @@ func (this *Data) Count() int {
 func (this *Data) Records() []function.Record {
 	return this.transData
 }
+
+func (this *Data) GetDate(index int) string {
+	if index < 0 || index >= this.Count() {
+		panic("bad index")
+	}
+
+	return this.Get(index).GetDate()
+}

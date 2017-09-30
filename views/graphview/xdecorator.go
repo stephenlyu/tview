@@ -9,7 +9,29 @@ import (
 	"github.com/stephenlyu/tview/constants"
 	"github.com/stephenlyu/tview/graphs/valuegraph"
 	"github.com/cznic/mathutil"
+	"github.com/stephenlyu/tds/period"
+	"github.com/stephenlyu/tds/date"
+	"fmt"
+	"strconv"
+	"github.com/stephenlyu/tds/entity"
 )
+
+const X_TICK_WIDTH_MIN = 100
+
+var weekMap = map[int]string {
+	1: "一",
+	2: "二",
+	3: "三",
+	4: "四",
+	5: "五",
+	6: "六",
+	0: "日",
+}
+
+type Ticker struct {
+	Index int
+	Text string
+}
 
 //go:generate qtmoc
 type XDecorator struct {
@@ -18,7 +40,8 @@ type XDecorator struct {
 	Pen *gui.QPen
 
 	Transformer transform.ScaleTransformer
-	Model *model.KLineModel
+	Data *model.Data
+	Period period.Period
 
 	Items []widgets.QGraphicsItem_ITF
 	ValueGraph *valuegraph.ValueGraph
@@ -28,7 +51,7 @@ type XDecorator struct {
 }
 
 func CreateXDecorator(parent widgets.QWidget_ITF) *XDecorator {
-	ret := NewYDecorator(parent)
+	ret := NewXDecorator(parent)
 	ret.Transformer = transform.NewLogicTransformer(1)
 	ret.init()
 	return ret
@@ -52,40 +75,92 @@ func (this *XDecorator) init() {
 	this.ValueGraph = valuegraph.NewValueGraph(this.Scene(), float64(this.Width()), VALUE_GRAPH_HEIGHT)
 
 	this.ConnectWheelEvent(this.WheelEvent)
+	this.ConnectResizeEvent(this.ResizeEvent)
 }
 
-func (this *XDecorator) SetTransformer(transformer transform.ScaleTransformer) {
-	this.Transformer = transformer
+func (this *XDecorator) SetData(data []entity.Record, p period.Period) {
+	this.Data = model.NewData(data)
+	this.Period = p
 }
 
-func (this *XDecorator) SetModel(model *model.KLineModel) {
-	this.Model = model
+func (this *XDecorator) getMonthTickers() []Ticker {
+	unitWidth := this.Transformer.To(1)
+
+	var result []Ticker
+
+	var prevIndex int = -1
+	var prevMonth int = -1
+
+	for i := this.FirstVisibleIndex; i < this.LastVisibleIndex; i++ {
+		if prevIndex != -1 {
+			if float64(i - prevIndex) * unitWidth < X_TICK_WIDTH_MIN {
+				continue
+			}
+		}
+		date := this.Data.GetDate(i)
+		year, _ := strconv.Atoi(date[:4])
+		month, _ := strconv.Atoi(date[4:6])
+
+		if i == this.FirstVisibleIndex {
+			result = append(result, Ticker{Index: i, Text: fmt.Sprintf("%d年", year)})
+		} else if month != prevMonth {
+			result = append(result, Ticker{Index: i, Text: fmt.Sprintf("%d", month)})
+		}
+		prevMonth = month
+		prevIndex = i
+	}
+	return result
 }
 
+func (this *XDecorator) getMinuteTickers() []Ticker {
+	unitWidth := this.Transformer.To(1)
 
+	var result []Ticker
+	var prevIndex int = -1
+
+	for i := this.FirstVisibleIndex; i < this.LastVisibleIndex; i++ {
+		if prevIndex != -1 {
+			if float64(i - prevIndex) * unitWidth < X_TICK_WIDTH_MIN {
+				continue
+			}
+		}
+		date := this.Data.GetDate(i)
+
+		if i == this.FirstVisibleIndex {
+			month, _ := strconv.Atoi(date[4:6])
+			day, _ := strconv.Atoi(date[6:8])
+			result = append(result, Ticker{Index: i, Text: fmt.Sprintf("%02d月%02d日", month, day)})
+		} else {
+			result = append(result, Ticker{Index: i, Text: fmt.Sprintf("%s", date[9:14])})
+		}
+	}
+	return result
+}
+
+func (this *XDecorator) getTickers() []Ticker {
+	if this.Period.Unit() == period.PERIOD_UNIT_MINUTE {
+		return this.getMinuteTickers()
+	}
+	return this.getMonthTickers()
+}
 
 func (this *XDecorator) drawUI() {
-	yMin = this.Transformer.To(yMin)
-	yMax = this.Transformer.To(yMax)
-	this.SetSceneRect2(0, yMin - constants.V_MARGIN, float64(this.Width()), yMax - yMin + 2 * constants.V_MARGIN)
-	this.CenterOn2(float64(this.Width()) / 2, (yMax + yMin) / 2)
+	tickers := this.getTickers()
 
 	trans := gui.QTransform_FromScale(1.0, -1.0)
-	for i := 0; i < this.Model.Count(); i++ {
-		rv := this.Model.Get(i)
-		v := this.Transformer.To(rv)
-		tick := this.Scene().AddLine2(0, v, constants.Y_TICK_WIDTH, v, this.Pen)
+	for _, ticker := range tickers {
+		x := this.Transformer.To(float64(ticker.Index))
+		tick := this.Scene().AddLine2(x, 0, x, float64(this.Height()), this.Pen)
 		this.Items = append(this.Items, tick)
 
-		text := this.formatValue(rv)
+		text := ticker.Text
 		ti := this.Scene().AddText(text, this.Font())
 		ti.SetDefaultTextColor(constants.DECORATOR_TEXT_COLOR)
 		ti.AdjustSize()
-		ti.SetTransform(trans, false)
+		ti.SetTransform(trans, true)
 		r := ti.BoundingRect()
-		x := float64(constants.Y_TICK_WIDTH + 2)
-		y := v + r.Height() / 2
-		ti.SetPos2(x, y)
+		ti.SetPos2(x + 2, (float64(this.Height()) + r.Height()) / 2)
+		r = ti.BoundingRect()
 		this.Items = append(this.Items, ti)
 	}
 }
@@ -93,15 +168,15 @@ func (this *XDecorator) drawUI() {
 func (this *XDecorator) UpdateUI() {
 	this.Clear()
 
-	width := float64(this.Model.Count()) * this.ItemWidth
+	width := float64(this.Data.Count()) * this.ItemWidth
 	usableWidth := this.Width() - 2 * H_MARGIN
 	fullMode := width < float64(usableWidth)
 	if fullMode {
 		width = float64(usableWidth)
 	}
-	this.Scene().SetSceneRect2(-H_MARGIN, 0, width + 2 * H_MARGIN, this.Height())
+	this.Scene().SetSceneRect2(-H_MARGIN, 0, width + 2 * H_MARGIN, float64(this.Height()))
 
-	yCenter := this.Height() / 2
+	yCenter := float64(this.Height()) / 2
 	var xCenter float64
 	if fullMode {
 		xCenter = float64(this.Scene().Width() - 2 * H_MARGIN) / 2
@@ -117,7 +192,10 @@ func (this *XDecorator) UpdateUI() {
 }
 
 func (this *XDecorator) Layout() {
-	if this.Model.Count() == 0 {
+	if this.Data == nil {
+		return
+	}
+	if this.Data.Count() == 0 {
 		return
 	}
 
@@ -145,10 +223,10 @@ func (this *XDecorator) Layout() {
 }
 
 func (this *XDecorator) SetVisibleRange(lastVisibleIndex int, visibleCount int) {
-	if this.Model.Count() == 0 {
+	if this.Data.Count() == 0 {
 		return
 	}
-	if lastVisibleIndex < 0 || lastVisibleIndex >= this.Model.Count() {
+	if lastVisibleIndex < 0 || lastVisibleIndex >= this.Data.Count() {
 		return
 	}
 
@@ -166,6 +244,22 @@ func (this *XDecorator) SetVisibleRange(lastVisibleIndex int, visibleCount int) 
 	this.Layout()
 }
 
+func (this *XDecorator) TrackPoint(currentIndex int, x float64, y float64) {
+	if currentIndex < this.FirstVisibleIndex {
+		this.LastVisibleIndex -= (this.FirstVisibleIndex - currentIndex)
+		this.Layout()
+	} else if currentIndex > this.LastVisibleIndex {
+		this.LastVisibleIndex = currentIndex
+		this.Layout()
+	}
+
+	this.ShowValue(currentIndex)
+}
+
+func (this *XDecorator) CompleteTrackPoint() {
+	this.HideValue()
+}
+
 func (this *XDecorator) Clear() {
 	for _, item := range this.Items {
 		this.Scene().RemoveItem(item)
@@ -178,11 +272,32 @@ func (this *XDecorator) Clear() {
 func (this *XDecorator) WheelEvent(event *gui.QWheelEvent) {
 }
 
+// Event Handlers
+func (this *XDecorator) ResizeEvent(event *gui.QResizeEvent) {
+	this.Layout()
+}
+
 func (this *XDecorator) ShowValue(index int) {
 	this.ValueGraph.Clear()
-	x := this.Transformer.To(value)
+	x := this.Transformer.To(float64(index))
 
-	this.ValueGraph.Update(0, y - VALUE_GRAPH_HEIGHT / 2, s)
+	var text string
+	dt := this.Data.GetDate(index)
+	if this.Period.Unit() == period.PERIOD_UNIT_MINUTE {
+		text = fmt.Sprintf("%s/%s %s", dt[4:6], dt[6:8], dt[9:14])
+	} else {
+		ts, _ := date.SecondString2Timestamp(dt)
+		week := date.GetDateWeekDay(ts)
+		text = fmt.Sprintf("%s/%s/%s/%s", dt[0:4], dt[4:6], dt[6:8], weekMap[week])
+	}
+
+	width := this.Transformer.To(float64(this.LastVisibleIndex + 1))
+	r := this.ValueGraph.MeasureText(text)
+	if x + r.Width() > width {
+		x = width - r.Width()
+	}
+
+	this.ValueGraph.Update(x, 0, text)
 }
 
 func (this *XDecorator) HideValue() {

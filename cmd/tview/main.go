@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 )
 
-const ROOT = "/Users/stephenlv/go/src/github.com/stephenlyu/tview/cmd/tview"
+const ROOT = "/Users/admin/go/src/github.com/stephenlyu/tview/cmd/tview"
 
 func initFormulaLibrary() {
 	model.GlobalLibrary.Register("MA", model.NewEasyLangFormulaCreatorFactory(filepath.Join(ROOT, "formulas/MA.d")))
@@ -46,7 +46,7 @@ func main() {
 		if err != nil {
 			logrus.Fatalf("加载数据失败，错误：%s", err.Error())
 		}
-		container.SetData(data)
+		container.SetData(data, period)
 	})
 	timer.Start(100)
 

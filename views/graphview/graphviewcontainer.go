@@ -8,6 +8,7 @@ import (
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/tview/constants"
 	"fmt"
+	"github.com/stephenlyu/tds/period"
 )
 
 const MAX_SECONDARY_GRAPHS = 5
@@ -16,10 +17,12 @@ const DEFAULT_SECONDARY_GRAPHS = 2
 
 //go:generate qtmoc
 type GraphViewContainer struct {
-	widgets.QSplitter
+	widgets.QWidget
 	MainWindow *mainwindow.MainWindow
 
 	// Children
+	splitter *widgets.QSplitter
+	xBar *XBar
 	graphViews []*GraphView
 	visibleIndices map[int]bool
 
@@ -38,12 +41,8 @@ type GraphViewContainer struct {
 // Life Cycle Routines
 
 func CreateGraphViewContainer(parent widgets.QWidget_ITF) *GraphViewContainer {
-	ret := NewGraphViewContainer(parent)
+	ret := NewGraphViewContainer(parent, core.Qt__Widget)
 	ret.currentIndex = -1
-	ret.SetOrientation(core.Qt__Vertical)
-	ret.SetOpaqueResize(false)
-	ret.SetHandleWidth(1)
-	ret.SetStyleSheet("QSplitter::handle { background-color: gray; }")
 
 	ret.init()
 	return ret
@@ -52,24 +51,45 @@ func CreateGraphViewContainer(parent widgets.QWidget_ITF) *GraphViewContainer {
 func (this *GraphViewContainer) createGraphView(isMain bool) *GraphView {
 	decorator := CreateGraphViewDecorator(isMain, this)
 	graphView := decorator.GraphView()
-	this.AddWidget(decorator)
+	this.splitter.AddWidget(decorator)
 	return graphView
 }
 
 func (this *GraphViewContainer) init() {
+	// 创建Layout
+	layout := widgets.NewQVBoxLayout()
+	layout.SetContentsMargins(0, 0, 0, 0)
+	layout.SetSpacing(0)
+	this.SetLayout(layout)
+
+	// Create QSplitter
+	this.splitter = widgets.NewQSplitter(this)
+	this.splitter.SetOrientation(core.Qt__Vertical)
+	this.splitter.SetOpaqueResize(false)
+	this.splitter.SetHandleWidth(1)
+	this.splitter.SetStyleSheet("QSplitter::handle { background-color: gray; }")
+	layout.AddWidget(this.splitter, 0, 0)
+
+	// Create XBar
+	this.xBar = CreateXBar(this)
+	layout.AddWidget(this.xBar, 0, 0)
+
+	// Create Graph views
 	this.visibleIndices = make(map[int]bool)
 	this.graphViews = make([]*GraphView, MAX_SECONDARY_GRAPHS + 1)
 
+	// Create main graph view
 	graphView := this.createGraphView(true)
 	graphView.SetName("MainGraphView")
-	this.SetStretchFactor(0, 3)
+	this.splitter.SetStretchFactor(0, 3)
 
 	this.graphViews[0] = graphView
 
+	// Create secondary graph view
 	for i := 0; i < MAX_SECONDARY_GRAPHS; i++ {
 		graphView := this.createGraphView(false)
 		graphView.SetName(fmt.Sprintf("SecondaryGraphView%d", i + 1))
-		this.SetStretchFactor(i + 1, 1)
+		this.splitter.SetStretchFactor(i + 1, 1)
 		this.graphViews[i + 1] = graphView
 	}
 
@@ -116,12 +136,13 @@ func (this *GraphViewContainer) HideSecondaryGraph(index int) {
 
 // Data & model routines
 
-func (this *GraphViewContainer) SetData(data []entity.Record) {
+func (this *GraphViewContainer) SetData(data []entity.Record, p period.Period) {
 	this.data = data
 
 	for _, view := range this.graphViews {
-		view.SetData(data)
+		view.SetData(data, p)
 	}
+	this.xBar.SetData(data, p)
 
 	this.SetViewVisibleRange()
 }
@@ -153,6 +174,7 @@ func (this *GraphViewContainer) SetViewVisibleRange() {
 	for _, view := range this.graphViews {
 		view.SetVisibleRange(lastVisibleIndex, visibleCount)
 	}
+	this.xBar.SetVisibleRange(lastVisibleIndex, visibleCount)
 	this.lastVisibleIndex = lastVisibleIndex
 }
 
@@ -223,6 +245,7 @@ func (this *GraphViewContainer) TrackPoint(currentIndex int, x float64, y float6
 		this.currentIndex = currentIndex
 		view.TrackPoint(currentIndex, x, y)
 	}
+	this.xBar.TrackPoint(currentIndex, x, y)
 }
 
 func (this *GraphViewContainer) CompleteTrackPoint() {
@@ -230,6 +253,7 @@ func (this *GraphViewContainer) CompleteTrackPoint() {
 	for _, view := range this.graphViews {
 		view.CompleteTrackPoint()
 	}
+	this.xBar.CompleteTrackPoint()
 	this.currentIndex = -1
 }
 

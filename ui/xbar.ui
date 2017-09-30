@@ -7,23 +7,27 @@
     <x>0</x>
     <y>0</y>
     <width>731</width>
-    <height>30</height>
+    <height>20</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>30</height>
+    <height>20</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>30</height>
+    <height>20</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">border-top: 1px solid red;
+border-bottom: 1px solid red;</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
    <property name="spacing">
@@ -79,6 +83,12 @@
        <height>0</height>
       </size>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>60</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="styleSheet">
       <string notr="true">background-color:black;</string>
      </property>
@@ -98,6 +108,22 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
+      <item>
+       <widget class="QPushButton" name="btnPeriod">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color:white;</string>
+        </property>
+        <property name="text">
+         <string>1分钟</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

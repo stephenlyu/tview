@@ -27,6 +27,11 @@ func NewValueGraph(scene *widgets.QGraphicsScene, w float64, h float64) *ValueGr
 	}
 }
 
+func (this *ValueGraph) MeasureText(value string) *core.QRectF {
+	fm := gui.NewQFontMetricsF(this.scene.Font())
+	return fm.BoundingRect(value)
+}
+
 func (this *ValueGraph) Update(x float64, y float64, value string) {
 	this.Clear()
 
