@@ -258,6 +258,9 @@ func (this *XDecorator) TrackPoint(currentIndex int, x float64, y float64) {
 }
 
 func (this *XDecorator) TrackXY(globalX float64, globalY float64) {
+	if this.Data == nil {
+		return
+	}
 	pt := core.NewQPoint2(int(globalX), int(globalY))
 	pt = this.MapFromGlobal(pt)
 	ptScene := this.MapToScene(pt)
