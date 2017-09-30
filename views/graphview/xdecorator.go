@@ -92,22 +92,24 @@ func (this *XDecorator) getMonthTickers() []Ticker {
 	var prevMonth int = -1
 
 	for i := this.FirstVisibleIndex; i < this.LastVisibleIndex; i++ {
+		date := this.Data.GetDate(i)
 		if prevIndex != -1 {
 			if float64(i - prevIndex) * unitWidth < X_TICK_WIDTH_MIN {
 				continue
 			}
 		}
-		date := this.Data.GetDate(i)
 		year, _ := strconv.Atoi(date[:4])
 		month, _ := strconv.Atoi(date[4:6])
 
 		if i == this.FirstVisibleIndex {
 			result = append(result, Ticker{Index: i, Text: fmt.Sprintf("%d年", year)})
+			prevMonth = month
+			prevIndex = i
 		} else if month != prevMonth {
 			result = append(result, Ticker{Index: i, Text: fmt.Sprintf("%d", month)})
+			prevMonth = month
+			prevIndex = i
 		}
-		prevMonth = month
-		prevIndex = i
 	}
 	return result
 }

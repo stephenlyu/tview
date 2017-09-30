@@ -2,8 +2,8 @@
 package uigen
 
 import (
-	"github.com/therecipe/qt/widgets"
 	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/widgets"
 )
 
 type UIXbarForm struct {
@@ -45,7 +45,8 @@ func (this *UIXbarForm) SetupUI(Form *widgets.QWidget) {
 	this.PlaceHolderLayout.SetSpacing(0)
 	this.BtnPeriod = widgets.NewQPushButton(this.Widget2)
 	this.BtnPeriod.SetObjectName("BtnPeriod")
-	this.BtnPeriod.SetMaximumSize(core.NewQSize2(16777215, 20))
+	this.BtnPeriod.SetMinimumSize(core.NewQSize2(60, 0))
+	this.BtnPeriod.SetMaximumSize(core.NewQSize2(60, 20))
 	this.BtnPeriod.SetStyleSheet("color:white;")
 	this.PlaceHolderLayout.AddWidget(this.BtnPeriod, 0, 0)
 	this.HorizontalLayout.AddWidget(this.Widget2, 0, 0)

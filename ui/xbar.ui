@@ -110,9 +110,15 @@ border-bottom: 1px solid red;</string>
       </property>
       <item>
        <widget class="QPushButton" name="btnPeriod">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>16777215</width>
+          <width>60</width>
           <height>20</height>
          </size>
         </property>

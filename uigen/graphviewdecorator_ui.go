@@ -63,6 +63,7 @@ func (this *UIGraphViewDecorator) SetupUI(GraphViewDecorator *widgets.QWidget) {
 	this.Widget4 = widgets.NewQWidget(this.Widget2, core.Qt__Widget)
 	this.Widget4.SetObjectName("Widget4")
 	this.Widget4.SetMinimumSize(core.NewQSize2(60, 0))
+	this.Widget4.SetMaximumSize(core.NewQSize2(60, 16777215))
 	this.YAxisLayout = widgets.NewQVBoxLayout2(this.Widget4)
 	this.YAxisLayout.SetObjectName("yAxisLayout")
 	this.YAxisLayout.SetContentsMargins(0, 0, 0, 0)
