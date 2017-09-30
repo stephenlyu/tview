@@ -26,8 +26,8 @@ type LineGraph struct {
 
 func NewLineGraph(model model.Model, valueIndex int, color *gui.QColor, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *LineGraph {
 	util.Assert(model != nil, "model != nil")
-	util.Assert(len(model.GetGraphTypes()) > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
-	util.Assert(model.GetGraphTypes()[valueIndex] == constants.GraphTypeLine, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeLine")
+	util.Assert(model.VarCount() > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
+	util.Assert(model.GraphType(valueIndex) == constants.GraphTypeLine, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeLine")
 
 	this := &LineGraph{
 		Model: model,
@@ -137,6 +137,9 @@ func (this *LineGraph) adjustIndices(startIndex int, endIndex int) (int, int) {
 
 // 更新当前显示的K线
 func (this *LineGraph) Update(startIndex int, endIndex int) {
+	if this.Model.NoDraw(this.ValueIndex) {
+		return
+	}
 	if startIndex < 0 {
 		startIndex = 0
 	}
@@ -155,6 +158,9 @@ func (this *LineGraph) Update(startIndex int, endIndex int) {
 
 // 清除所有的K线
 func (this *LineGraph) Clear() {
+	if this.Model.NoDraw(this.ValueIndex) {
+		return
+	}
 	if this.PathItem != nil {
 		this.Scene.RemoveItem(this.PathItem)
 		this.PathItem = nil
@@ -162,6 +168,9 @@ func (this *LineGraph) Clear() {
 }
 
 func (this *LineGraph) ShowInfo(index int, display graphs.InfoDisplay) {
+	if this.Model.NoText(this.ValueIndex) {
+		return
+	}
 	if index < 0 || index >= this.Model.Count() {
 		return
 	}

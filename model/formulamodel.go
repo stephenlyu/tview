@@ -2,7 +2,6 @@ package model
 
 import (
 	"github.com/stephenlyu/goformula/stockfunc/formula"
-	"github.com/stephenlyu/tview/constants"
 )
 
 type FormulaModel struct {
@@ -10,11 +9,10 @@ type FormulaModel struct {
 
 	varNames []string
 
-	graphTypes []constants.GraphType
-	Formula formula.Formula
+	formula.Formula
 }
 
-func NewFormulaModel(f formula.Formula, graphTypes []constants.GraphType) *FormulaModel {
+func NewFormulaModel(f formula.Formula) *FormulaModel {
 	varNames := make([]string, f.VarCount())
 	for i := 0; i < f.VarCount(); i++ {
 		varNames[i] = f.VarName(i)
@@ -22,7 +20,6 @@ func NewFormulaModel(f formula.Formula, graphTypes []constants.GraphType) *Formu
 
 	return &FormulaModel{
 		varNames: varNames,
-		graphTypes: graphTypes,
 		Formula: f,
 	}
 }
@@ -63,10 +60,6 @@ func (this *FormulaModel) GetNames() []string {
 	return this.varNames
 }
 
-func (this *FormulaModel) GetGraphTypes() []constants.GraphType {
-	return this.graphTypes
-}
-
 func (this *FormulaModel) NotifyDataChanged() {
 	panic("!!!Not Supported!!!")
 }
@@ -77,4 +70,40 @@ func (this *FormulaModel) NotifyLastDataChanged() {
 	for _, listener := range this.listeners {
 		listener.OnLastDataChanged()
 	}
+}
+
+func (this *FormulaModel) VarCount() int {
+	return this.Formula.VarCount()
+}
+
+func (this *FormulaModel) NoDraw(index int) bool {
+	return this.Formula.NoDraw(index)
+}
+
+func (this *FormulaModel) NoText(index int) bool {
+	return this.Formula.NoText(index)
+}
+
+func (this *FormulaModel) DrawAbove(index int) bool {
+	return this.Formula.DrawAbove(index)
+}
+
+func (this *FormulaModel) NoFrame(index int) bool {
+	return this.Formula.NoFrame(index)
+}
+
+func (this *FormulaModel) Color(index int) string {
+	return this.Formula.Color(index)
+}
+
+func (this *FormulaModel) LineThick(index int) int {
+	return this.Formula.LineThick(index)
+}
+
+func (this *FormulaModel) LineStyle(index int) int {
+	return this.Formula.LineStyle(index)
+}
+
+func (this *FormulaModel) GraphType(index int) int {
+	return this.Formula.GraphType(index)
 }

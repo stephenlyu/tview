@@ -26,8 +26,8 @@ type StickGraph struct {
 
 func NewStickGraph(model model.Model, valueIndex int, color *gui.QColor, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *StickGraph {
 	util.Assert(model != nil, "model != nil")
-	util.Assert(len(model.GetGraphTypes()) > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
-	util.Assert(model.GetGraphTypes()[valueIndex] == constants.GraphTypeStick, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeStick")
+	util.Assert(model.VarCount() > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
+	util.Assert(model.GraphType(valueIndex) == constants.GraphTypeColorStick, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeStick")
 
 	this := &StickGraph{
 		Model: model,
@@ -144,6 +144,9 @@ func (this *StickGraph) adjustIndices(startIndex int, endIndex int) (int, int) {
 
 // 更新当前显示的K线
 func (this *StickGraph) Update(startIndex int, endIndex int) {
+	if this.Model.NoDraw(this.ValueIndex) {
+		return
+	}
 	if startIndex < 0 {
 		startIndex = 0
 	}
@@ -179,6 +182,9 @@ func (this *StickGraph) Update(startIndex int, endIndex int) {
 
 // 清除所有的K线
 func (this *StickGraph) Clear() {
+	if this.Model.NoDraw(this.ValueIndex) {
+		return
+	}
 	for _, item := range this.Lines {
 		this.Scene.RemoveItem(item)
 	}
@@ -191,6 +197,9 @@ func (this *StickGraph) Clear() {
 }
 
 func (this *StickGraph) ShowInfo(index int, display graphs.InfoDisplay) {
+	if this.Model.NoText(this.ValueIndex) {
+		return
+	}
 	if index < 0 || index >= this.Model.Count() {
 		return
 	}

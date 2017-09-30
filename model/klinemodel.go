@@ -57,6 +57,38 @@ func (this *KLineModel) GetNames() []string {
 	return []string{"OPEN", "CLOSE", "HIGH", "LOW"}
 }
 
-func (this *KLineModel) GetGraphTypes() []constants.GraphType {
-	return []constants.GraphType{constants.GraphTypeKLine}
+func (this *KLineModel) VarCount() int {
+	return 1
+}
+
+func (this *KLineModel) NoDraw(index int) bool {
+	return false
+}
+
+func (this *KLineModel) NoText(index int) bool {
+	return false
+}
+
+func (this *KLineModel) DrawAbove(index int) bool {
+	return false
+}
+
+func (this *KLineModel) NoFrame(index int) bool {
+	return false
+}
+
+func (this *KLineModel) Color(index int) string {
+	return ""
+}
+
+func (this *KLineModel) LineThick(index int) int {
+	return 1
+}
+
+func (this *KLineModel) LineStyle(index int) int {
+	return 0
+}
+
+func (this *KLineModel) GraphType(index int) int {
+	return constants.GraphTypeKLine
 }

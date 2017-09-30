@@ -1,13 +1,18 @@
 package constants
 
-import "github.com/therecipe/qt/gui"
+import (
+	"github.com/therecipe/qt/gui"
+	"github.com/stephenlyu/goformula/stockfunc/formula"
+)
 
-type GraphType int
 const (
-	GraphTypeKLine = iota		// Kline, consume 4 values
-	GraphTypeLine				// Line graph, consume 1 value
-	GraphTypeStick				// Line graph, consume 1 value
-	GraphTypeVolStick                // Line graph, consume 1 value
+	GraphTypeLine = formula.FORMULA_GRAPH_LINE							// Line graph, consume 1 value
+	GraphTypeColorStick = formula.FORMULA_GRAPH_COLOR_STICK             // Line graph, consume 1 value
+	GraphTypeStick = formula.FORMULA_GRAPH_COLOR_STICK             		// Line graph, consume 1 value
+	GraphTypeLineStick = formula.FORMULA_GRAPH_LINE_STICK             	// Line graph, consume 1 value
+	GraphTypeVolStick = formula.FORMULA_GRAPH_VOL_STICK           		// Line graph, consume 1 value
+
+	GraphTypeKLine = 99
 )
 
 

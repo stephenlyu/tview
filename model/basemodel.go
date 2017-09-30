@@ -2,7 +2,6 @@ package model
 
 import (
 	"github.com/stephenlyu/tview/transform"
-	"github.com/stephenlyu/tview/constants"
 )
 
 type BaseModel struct {
@@ -27,7 +26,7 @@ func (this *BaseModel) Get(index int) []float64 {
 	return nil
 }
 
-func (this *BaseModel) GetGraphTypes() []constants.GraphType {
+func (this *BaseModel) GetGraphTypes() []int {
 	panic("Unimplemented")
 	return nil
 }

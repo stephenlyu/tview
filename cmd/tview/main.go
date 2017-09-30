@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 )
 
-const ROOT = "/Users/admin/go/src/github.com/stephenlyu/tview/cmd/tview"
+const ROOT = "/Users/stephenlv/go/src/github.com/stephenlyu/tview/cmd/tview"
 
 func initFormulaLibrary() {
 	model.GlobalLibrary.Register("MA", model.NewEasyLangFormulaCreatorFactory(filepath.Join(ROOT, "formulas/MA.d")))

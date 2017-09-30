@@ -11,6 +11,7 @@ import (
 	"github.com/stephenlyu/tview/graphs/stickgraph"
 	"github.com/stephenlyu/tview/graphs/volgraph"
 	"github.com/therecipe/qt/gui"
+	"math"
 )
 
 type FormulaGraph struct {
@@ -36,17 +37,16 @@ func NewFormulaGraph(model model.Model, klineModel model.Model, scene *widgets.Q
 }
 
 func (this *FormulaGraph) init() {
-	graphTypes := this.Model.GetGraphTypes()
-	this.graphs = make([]graphs.Graph, len(graphTypes))
+	this.graphs = make([]graphs.Graph, this.Model.VarCount())
 	j := 0
-	for i, graphType := range graphTypes {
+	for i := 0; i < this.Model.VarCount(); i++ {
 		var graph graphs.Graph
 		color := graphs.COLORS[j % len(graphs.COLORS)]
 		j++
-		switch graphType {
+		switch this.Model.GraphType(i) {
 		case constants.GraphTypeLine:
 			graph = linegraph.NewLineGraph(this.Model, i, color, this.Scene, this.xTransformer)
-		case constants.GraphTypeStick:
+		case constants.GraphTypeColorStick:
 			graph = stickgraph.NewStickGraph(this.Model, i, color, this.Scene, this.xTransformer)
 		case constants.GraphTypeVolStick:
 			graph = volgraph.NewVolStickGraph(this.Model, i, color, this.KLineModel, this.Scene, this.xTransformer)
@@ -56,9 +56,13 @@ func (this *FormulaGraph) init() {
 }
 
 func (this *FormulaGraph) GetValueRange(startIndex int, endIndex int) (float64, float64) {
-	low, high := this.graphs[0].GetValueRange(startIndex, endIndex)
+	high := -math.MaxFloat64
+	low := math.MaxFloat64
 
-	for i := 1; i < len(this.graphs); i++ {
+	for i := 0; i < len(this.graphs); i++ {
+		if this.Model.NoDraw(i) {
+			continue
+		}
 		low1, high1 := this.graphs[i].GetValueRange(startIndex, endIndex)
 		if low1 < low {
 			low = low1
@@ -73,14 +77,20 @@ func (this *FormulaGraph) GetValueRange(startIndex int, endIndex int) (float64, 
 
 // 更新当前显示的K线
 func (this *FormulaGraph) Update(startIndex int, endIndex int) {
-	for _, graph := range this.graphs {
+	for i, graph := range this.graphs {
+		if this.Model.NoDraw(i) {
+			continue
+		}
 		graph.Update(startIndex, endIndex)
 	}
 }
 
 // 清除所有的K线
 func (this *FormulaGraph) Clear() {
-	for _, graph := range this.graphs {
+	for i, graph := range this.graphs {
+		if this.Model.NoDraw(i) {
+			continue
+		}
 		graph.Clear()
 	}
 }

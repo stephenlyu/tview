@@ -19,8 +19,8 @@ type KLineGraph struct {
 
 func NewKLineGraph(model model.Model, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *KLineGraph {
 	util.Assert(model != nil, "model != nil")
-	util.Assert(len(model.GetGraphTypes()) == 1, "bad model graph types")
-	util.Assert(model.GetGraphTypes()[0] == constants.GraphTypeKLine, "bad model graph types")
+	util.Assert(model.VarCount() == 1, "bad model graph types")
+	util.Assert(model.GraphType(0) == constants.GraphTypeKLine, "bad model graph types")
 
 	this := &KLineGraph{
 		Model: model,

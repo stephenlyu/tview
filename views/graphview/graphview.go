@@ -238,18 +238,8 @@ func (this *GraphView) AddFormula(name string, args []float64) {
 func (this *GraphView) createFormulaGraph(name string) {
 	creator := this.FormulaCreators[name]
 
-	var graphTypes []constants.GraphType
-	switch name {
-	case "MACD":
-		graphTypes = []constants.GraphType{constants.GraphTypeLine, constants.GraphTypeLine, constants.GraphTypeStick}
-	case "MA":
-		graphTypes = []constants.GraphType{constants.GraphTypeLine, constants.GraphTypeLine, constants.GraphTypeLine, constants.GraphTypeLine}
-	case "VOL":
-		graphTypes = []constants.GraphType{constants.GraphTypeVolStick, constants.GraphTypeLine, constants.GraphTypeLine}
-	}
-
 	_, formula := creator.CreateFormula(this.Data)
-	model := model.NewFormulaModel(formula, graphTypes)
+	model := model.NewFormulaModel(formula)
 	this.setModelTransformers(model)
 	this.Models[name] = model
 	this.Graphs[name] = formulagraph.NewFormulaGraph(model, this.Models[KLINE_MODEL], this.Scene(), this.XScaleTransformer)
