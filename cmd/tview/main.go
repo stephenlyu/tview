@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/therecipe/qt/widgets"
 	"os"
+	"strings"
 	"github.com/stephenlyu/tview/views/mainwindow"
 	"github.com/stephenlyu/tview/views/graphview"
 	"github.com/therecipe/qt/core"
@@ -14,12 +15,43 @@ import (
 	"path/filepath"
 )
 
-const ROOT = "/Users/stephenlv/go/src/github.com/stephenlyu/tview/cmd/tview"
+const DATA_DIR = "data"
+const FORMULA_DIR = "formulas"
 
 func initFormulaLibrary() {
-	model.GlobalLibrary.Register("MA", model.NewEasyLangFormulaCreatorFactory(filepath.Join(ROOT, "formulas/MA.d")))
-	model.GlobalLibrary.Register("MACD", model.NewEasyLangFormulaCreatorFactory(filepath.Join(ROOT, "formulas/MACD.d")))
-	model.GlobalLibrary.Register("VOL", model.NewEasyLangFormulaCreatorFactory(filepath.Join(ROOT, "formulas/VOL.d")))
+	formulaDir := FindDir(FORMULA_DIR)
+	model.GlobalLibrary.Register("MA", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "MA.d")))
+	model.GlobalLibrary.Register("MACD", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "MACD.d")))
+	model.GlobalLibrary.Register("VOL", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "VOL.d")))
+}
+
+func FindDir(dirName string) string {
+	_, err := os.Stat(dirName)
+	if err == nil {
+		return dirName
+	}
+
+	if !os.IsNotExist(err) {
+		panic(err)
+	}
+
+	cwd, _ := os.Getwd()
+
+	cwd, _ = filepath.Abs(cwd)
+	separator := string([]byte{os.PathSeparator})
+	parts := strings.Split(filepath.Clean(cwd), separator)
+	for i := len(parts) - 1; i > 0; i-- {
+		filePath := filepath.Join(append(parts[:i], dirName)...)
+		if cwd[0] == os.PathSeparator {
+			filePath = separator + filePath
+		}
+
+		_, err := os.Stat(filePath)
+		if err == nil {
+			return filePath
+		}
+	}
+	return dirName
 }
 
 func main() {
@@ -39,7 +71,7 @@ func main() {
 	timer := core.NewQTimer(w.Widget)
 	timer.SetSingleShot(true)
 	timer.ConnectTimeout(func () {
-		ds := tdxdatasource.NewDataSource(filepath.Join(ROOT, "data"), true)
+		ds := tdxdatasource.NewDataSource(FindDir(DATA_DIR), true)
 		security, _ := entity.ParseSecurity("000001.SZ")
 		_, period := period.PeriodFromString("D1")
 		err, data := ds.GetData(security, period)
