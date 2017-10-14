@@ -96,10 +96,13 @@ func main() {
 
 	app := widgets.NewQApplication(len(os.Args), os.Args)
 	w := mainwindow.GetMainWindow(nil)
-	//graphView := graphview.CreateGraphView(true, w.Widget)
 	container := graphview.CreateGraphViewContainer(w.Widget)
 	w.Push(container)
-	w.Widget.Show()
+
+	rect := app.Desktop().AvailableGeometry(-1)
+	w.Widget.Resize2(int(float64(rect.Width()) * 0.8), int(float64(rect.Height()) * 0.8))
+	w.Widget.Move2(int(float64(rect.Width()) * 0.1), int(float64(rect.Height()) * 0.1))
+	w.Widget.ShowMaximized()
 
 	container.AddGraphFormula(0, "MA", []float64{5, 10, 20, 60})
 	container.AddGraphFormula(1, "MACD", []float64{12, 26, 9})
