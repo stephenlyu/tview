@@ -13,6 +13,9 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/stephenlyu/tview/model"
 	"path/filepath"
+	"github.com/z-ray/log"
+	"runtime"
+	"bytes"
 )
 
 const DATA_DIR = "data"
@@ -54,7 +57,41 @@ func FindDir(dirName string) string {
 	return dirName
 }
 
+func PanicTrace(kb int) []byte {
+	s := []byte("/src/runtime/panic.go")
+	e := []byte("\ngoroutine ")
+	line := []byte("\n")
+	stack := make([]byte, kb<<10) //4KB
+	length := runtime.Stack(stack, true)
+	start := bytes.Index(stack, s)
+	stack = stack[start:length]
+	start = bytes.Index(stack, line) + 1
+	stack = stack[start:]
+	end := bytes.LastIndex(stack, line)
+	if end != -1 {
+		stack = stack[:end]
+	}
+	end = bytes.Index(stack, e)
+	if end != -1 {
+		stack = stack[:end]
+	}
+	stack = bytes.TrimRight(stack, "\n")
+	return stack
+}
+
 func main() {
+	writer, _ := os.Create("tview.log")
+
+	log.SetOutput(writer)
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(string(PanicTrace(2)))
+			log.Error(err)
+			writer.Close()
+			os.Exit(-2)
+		}
+	}()
+
 	initFormulaLibrary()
 
 	app := widgets.NewQApplication(len(os.Args), os.Args)
@@ -83,4 +120,6 @@ func main() {
 	timer.Start(100)
 
 	os.Exit(app.Exec())
+
+	writer.Close()
 }
