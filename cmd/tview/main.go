@@ -26,6 +26,7 @@ func initFormulaLibrary() {
 	model.GlobalLibrary.Register("MA", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "MA.d")))
 	model.GlobalLibrary.Register("MACD", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "MACD.d")))
 	model.GlobalLibrary.Register("VOL", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "VOL.d")))
+	model.GlobalLibrary.Register("CLOSE", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "CLOSE.d")))
 }
 
 func FindDir(dirName string) string {
@@ -107,6 +108,9 @@ func main() {
 	container.AddGraphFormula(0, "MA", []float64{5, 10, 20, 60})
 	container.AddGraphFormula(1, "MACD", []float64{12, 26, 9})
 	container.AddGraphFormula(2, "VOL", []float64{5, 10})
+	container.AddGraphFormula(3, "CLOSE", []float64{})
+
+	//container.ShowGraph(2)
 
 	timer := core.NewQTimer(w.Widget)
 	timer.SetSingleShot(true)

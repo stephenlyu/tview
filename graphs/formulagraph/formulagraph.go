@@ -12,6 +12,8 @@ import (
 	"github.com/stephenlyu/tview/graphs/volgraph"
 	"github.com/therecipe/qt/gui"
 	"math"
+	"github.com/stephenlyu/tview/graphs/stickgraph"
+	"github.com/stephenlyu/tview/graphs/linestickgraph"
 )
 
 type FormulaGraph struct {
@@ -53,7 +55,11 @@ func (this *FormulaGraph) init() {
 		case constants.GraphTypeLine:
 			graph = linegraph.NewLineGraph(this.Model, i, color, this.Scene, this.xTransformer)
 		case constants.GraphTypeColorStick:
-			graph = colorstickgraph.NewStickGraph(this.Model, i, color, this.Scene, this.xTransformer)
+			graph = colorstickgraph.NewColorStickGraph(this.Model, i, color, this.Scene, this.xTransformer)
+		case constants.GraphTypeStick:
+			graph = stickgraph.NewStickGraph(this.Model, i, color, this.Scene, this.xTransformer)
+		case constants.GraphTypeLineStick:
+			graph = linestickgraph.NewLineStickGraph(this.Model, i, color, this.Scene, this.xTransformer)
 		case constants.GraphTypeVolStick:
 			graph = volgraph.NewVolStickGraph(this.Model, i, color, this.KLineModel, this.Scene, this.xTransformer)
 		}

@@ -12,7 +12,7 @@ import (
 )
 
 const MAX_SECONDARY_GRAPHS = 5
-const DEFAULT_SECONDARY_GRAPHS = 2
+const DEFAULT_SECONDARY_GRAPHS = 3
 
 
 //go:generate qtmoc

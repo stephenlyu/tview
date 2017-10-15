@@ -1,4 +1,4 @@
-package colorstickgraph
+package linestickgraph
 
 import (
 	"github.com/stephenlyu/tview/model"
@@ -9,10 +9,12 @@ import (
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/tview/graphs"
 	"fmt"
+	"github.com/stephenlyu/goformula/function"
+	"github.com/therecipe/qt/core"
 )
 
 
-type ColorStickGraph struct {
+type LineStickGraph struct {
 	Model model.Model
 	ValueIndex int
 	Color *gui.QColor
@@ -22,14 +24,15 @@ type ColorStickGraph struct {
 	startIndex, endIndex int
 	XAxis *widgets.QGraphicsLineItem
 	Lines map[int]*widgets.QGraphicsPathItem
+	PathItem *widgets.QGraphicsPathItem
 }
 
-func NewColorStickGraph(model model.Model, valueIndex int, color *gui.QColor, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *ColorStickGraph {
+func NewLineStickGraph(model model.Model, valueIndex int, color *gui.QColor, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *LineStickGraph {
 	util.Assert(model != nil, "model != nil")
 	util.Assert(model.VarCount() > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
-	util.Assert(model.GraphType(valueIndex) == constants.GraphTypeColorStick, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeColorStick")
+	util.Assert(model.GraphType(valueIndex) == constants.GraphTypeLineStick, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeLineStick")
 
-	this := &ColorStickGraph{
+	this := &LineStickGraph{
 		Model: model,
 		ValueIndex: valueIndex,
 		Color: color,
@@ -41,11 +44,11 @@ func NewColorStickGraph(model model.Model, valueIndex int, color *gui.QColor, sc
 	return this
 }
 
-func (this *ColorStickGraph) init() {
+func (this *LineStickGraph) init() {
 	this.Model.AddListener(this)
 }
 
-func (this *ColorStickGraph) OnDataChanged() {
+func (this *LineStickGraph) OnDataChanged() {
 	for i, item := range this.Lines {
 		if i >= this.Model.Count() {
 			continue
@@ -54,7 +57,7 @@ func (this *ColorStickGraph) OnDataChanged() {
 	}
 }
 
-func (this *ColorStickGraph) OnLastDataChanged() {
+func (this *LineStickGraph) OnLastDataChanged() {
 	if this.Model.Count() <= 0 {
 		return
 	}
@@ -64,7 +67,7 @@ func (this *ColorStickGraph) OnLastDataChanged() {
 	this.updateStick(i, item)
 }
 
-func (this *ColorStickGraph) GetValueRange(startIndex int, endIndex int) (float64, float64) {
+func (this *LineStickGraph) GetValueRange(startIndex int, endIndex int) (float64, float64) {
 	if this.Model.Count() == 0 {
 		return 0, 0
 	}
@@ -104,7 +107,7 @@ func (this *ColorStickGraph) GetValueRange(startIndex int, endIndex int) (float6
 	return low, high
 }
 
-func (this *ColorStickGraph) ensureItem(i int) *widgets.QGraphicsPathItem {
+func (this *LineStickGraph) ensureItem(i int) *widgets.QGraphicsPathItem {
 	item, ok := this.Lines[i]
 	if !ok {
 		item = widgets.NewQGraphicsPathItem(nil)
@@ -114,7 +117,42 @@ func (this *ColorStickGraph) ensureItem(i int) *widgets.QGraphicsPathItem {
 	return item
 }
 
-func (this *ColorStickGraph) updateStick(i int, item *widgets.QGraphicsPathItem) {
+func (this *LineStickGraph) buildLine() {
+	fmt.Println("buildLine")
+	this.clearLine()
+
+	if this.Model.Count() == 0 {
+		return
+	}
+
+	path := gui.NewQPainterPath()
+
+	needMove := true
+	for i := this.startIndex; i < this.endIndex; i++ {
+		x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 1))) / 2
+		values := this.Model.Get(i)
+		v := values[this.ValueIndex]
+
+		if function.IsNaN(v) {
+			needMove = true
+			continue
+		}
+
+		if needMove {
+			path.MoveTo2(x, v)
+			needMove = false
+		} else {
+			path.LineTo2(x, v)
+		}
+	}
+
+	brush := gui.NewQBrush3(this.Color, core.Qt__NoBrush)
+	pen := gui.NewQPen3(this.Color)
+
+	this.PathItem = this.Scene.AddPath(path, pen, brush)
+}
+
+func (this *LineStickGraph) updateStick(i int, item *widgets.QGraphicsPathItem) {
 	x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 1))) / 2
 	y := this.Model.Get(i)[this.ValueIndex]
 
@@ -123,16 +161,12 @@ func (this *ColorStickGraph) updateStick(i int, item *widgets.QGraphicsPathItem)
 	path.MoveTo2(x, 0)
 	path.LineTo2(x, y)
 
-	if y < 0 {
-		item.SetPen(gui.NewQPen3(graphs.NegativeColor))
-	} else {
-		item.SetPen(gui.NewQPen3(graphs.PositiveColor))
-	}
+	item.SetPen(gui.NewQPen3(this.Color))
 
 	item.SetPath(path)
 }
 
-func (this *ColorStickGraph) adjustIndices(startIndex int, endIndex int) (int, int) {
+func (this *LineStickGraph) adjustIndices(startIndex int, endIndex int) (int, int) {
 	if startIndex > 0 {
 		startIndex--
 	}
@@ -143,7 +177,7 @@ func (this *ColorStickGraph) adjustIndices(startIndex int, endIndex int) (int, i
 }
 
 // 更新当前显示的K线
-func (this *ColorStickGraph) Update(startIndex int, endIndex int) {
+func (this *LineStickGraph) Update(startIndex int, endIndex int) {
 	if this.Model.NoDraw(this.ValueIndex) {
 		return
 	}
@@ -156,6 +190,11 @@ func (this *ColorStickGraph) Update(startIndex int, endIndex int) {
 	}
 
 	startIndex, endIndex = this.adjustIndices(startIndex, endIndex)
+	this.startIndex = startIndex
+	this.endIndex = endIndex
+
+	// 更新需要显示的K线
+	this.buildLine()
 
 	// 隐藏不需要显示的K线
 	for i, item := range this.Lines {
@@ -180,8 +219,15 @@ func (this *ColorStickGraph) Update(startIndex int, endIndex int) {
 	this.XAxis = this.Scene.AddLine2(x1, 0, x2, 0, gui.NewQPen3(gui.NewQColor3(255, 255, 255, 255)))
 }
 
+func (this *LineStickGraph) clearLine() {
+	if this.PathItem != nil {
+		this.Scene.RemoveItem(this.PathItem)
+		this.PathItem = nil
+	}
+}
+
 // 清除所有的K线
-func (this *ColorStickGraph) Clear() {
+func (this *LineStickGraph) Clear() {
 	if this.Model.NoDraw(this.ValueIndex) {
 		return
 	}
@@ -192,11 +238,12 @@ func (this *ColorStickGraph) Clear() {
 		this.Scene.RemoveItem(this.XAxis)
 		this.XAxis = nil
 	}
+	this.clearLine()
 
 	this.Lines = make(map[int]*widgets.QGraphicsPathItem)
 }
 
-func (this *ColorStickGraph) ShowInfo(index int, display graphs.InfoDisplay) {
+func (this *LineStickGraph) ShowInfo(index int, display graphs.InfoDisplay) {
 	if this.Model.NoText(this.ValueIndex) {
 		return
 	}

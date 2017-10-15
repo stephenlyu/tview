@@ -1,0 +1,2 @@
+{参数}
+收盘价:CLOSE, COLORRED, LINESTICK;
