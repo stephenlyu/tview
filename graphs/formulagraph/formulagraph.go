@@ -8,7 +8,7 @@ import (
 	"github.com/stephenlyu/tview/graphs"
 	"github.com/stephenlyu/tview/constants"
 	"github.com/stephenlyu/tview/graphs/linegraph"
-	"github.com/stephenlyu/tview/graphs/stickgraph"
+	"github.com/stephenlyu/tview/graphs/colorstickgraph"
 	"github.com/stephenlyu/tview/graphs/volgraph"
 	"github.com/therecipe/qt/gui"
 	"math"
@@ -53,7 +53,7 @@ func (this *FormulaGraph) init() {
 		case constants.GraphTypeLine:
 			graph = linegraph.NewLineGraph(this.Model, i, color, this.Scene, this.xTransformer)
 		case constants.GraphTypeColorStick:
-			graph = stickgraph.NewStickGraph(this.Model, i, color, this.Scene, this.xTransformer)
+			graph = colorstickgraph.NewStickGraph(this.Model, i, color, this.Scene, this.xTransformer)
 		case constants.GraphTypeVolStick:
 			graph = volgraph.NewVolStickGraph(this.Model, i, color, this.KLineModel, this.Scene, this.xTransformer)
 		}

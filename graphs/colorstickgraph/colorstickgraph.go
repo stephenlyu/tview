@@ -1,4 +1,4 @@
-package stickgraph
+package colorstickgraph
 
 import (
 	"github.com/stephenlyu/tview/model"
