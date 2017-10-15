@@ -121,6 +121,8 @@ func (this *LineGraph) buildLine() {
 
 	brush := gui.NewQBrush3(this.color, core.Qt__NoBrush)
 	pen := gui.NewQPen3(this.color)
+	graphs.SetPenStyle(pen, this.Model.LineStyle(this.ValueIndex))
+	graphs.SetPenWidth(pen, this.xTransformer, this.Model.LineThick(this.ValueIndex))
 
 	this.PathItem = this.Scene.AddPath(path, pen, brush)
 }

@@ -123,7 +123,9 @@ func (this *StickGraph) updateStick(i int, item *widgets.QGraphicsPathItem) {
 	path.MoveTo2(x, 0)
 	path.LineTo2(x, y)
 
-	item.SetPen(gui.NewQPen3(this.Color))
+	pen := gui.NewQPen3(this.Color)
+	item.SetPen(pen)
+	graphs.SetPenWidth(pen, this.xTransformer, this.Model.LineThick(this.ValueIndex))
 
 	item.SetPath(path)
 }

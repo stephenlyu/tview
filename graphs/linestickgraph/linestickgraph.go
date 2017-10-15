@@ -118,7 +118,6 @@ func (this *LineStickGraph) ensureItem(i int) *widgets.QGraphicsPathItem {
 }
 
 func (this *LineStickGraph) buildLine() {
-	fmt.Println("buildLine")
 	this.clearLine()
 
 	if this.Model.Count() == 0 {
@@ -148,6 +147,8 @@ func (this *LineStickGraph) buildLine() {
 
 	brush := gui.NewQBrush3(this.Color, core.Qt__NoBrush)
 	pen := gui.NewQPen3(this.Color)
+	graphs.SetPenStyle(pen, this.Model.LineStyle(this.ValueIndex))
+	graphs.SetPenWidth(pen, this.xTransformer, this.Model.LineThick(this.ValueIndex))
 
 	this.PathItem = this.Scene.AddPath(path, pen, brush)
 }
@@ -161,7 +162,9 @@ func (this *LineStickGraph) updateStick(i int, item *widgets.QGraphicsPathItem) 
 	path.MoveTo2(x, 0)
 	path.LineTo2(x, y)
 
-	item.SetPen(gui.NewQPen3(this.Color))
+	pen := gui.NewQPen3(this.Color)
+	graphs.SetPenWidth(pen, this.xTransformer, this.Model.LineThick(this.ValueIndex))
+	item.SetPen(pen)
 
 	item.SetPath(path)
 }
