@@ -92,7 +92,7 @@ func (this *FormulaModel) NoFrame(index int) bool {
 	return this.Formula.NoFrame(index)
 }
 
-func (this *FormulaModel) Color(index int) string {
+func (this *FormulaModel) Color(index int) *formula.Color {
 	return this.Formula.Color(index)
 }
 

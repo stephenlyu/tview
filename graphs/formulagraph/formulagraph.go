@@ -39,10 +39,16 @@ func NewFormulaGraph(model model.Model, klineModel model.Model, scene *widgets.Q
 func (this *FormulaGraph) init() {
 	this.graphs = make([]graphs.Graph, this.Model.VarCount())
 	j := 0
+	var color *gui.QColor
 	for i := 0; i < this.Model.VarCount(); i++ {
 		var graph graphs.Graph
-		color := graphs.COLORS[j % len(graphs.COLORS)]
-		j++
+		fColor := this.Model.Color(i)
+		if fColor != nil {
+			color = gui.NewQColor3(fColor.Red, fColor.Green, fColor.Blue, 255)
+		} else {
+			color = graphs.COLORS[j % len(graphs.COLORS)]
+			j++
+		}
 		switch this.Model.GraphType(i) {
 		case constants.GraphTypeLine:
 			graph = linegraph.NewLineGraph(this.Model, i, color, this.Scene, this.xTransformer)

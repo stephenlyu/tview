@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/stephenlyu/tview/constants"
+	"github.com/stephenlyu/goformula/stockfunc/formula"
 )
 
 type KLineModel struct {
@@ -77,8 +78,8 @@ func (this *KLineModel) NoFrame(index int) bool {
 	return false
 }
 
-func (this *KLineModel) Color(index int) string {
-	return ""
+func (this *KLineModel) Color(index int) *formula.Color {
+	return nil
 }
 
 func (this *KLineModel) LineThick(index int) int {
