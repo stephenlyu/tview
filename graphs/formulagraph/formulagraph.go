@@ -18,6 +18,7 @@ import (
 	"github.com/stephenlyu/tview/graphs/klinegraph"
 	"github.com/stephenlyu/tview/graphs/ploylinegraph"
 	"fmt"
+	"github.com/stephenlyu/tview/graphs/drawlinegraph"
 )
 
 type FormulaGraph struct {
@@ -101,6 +102,7 @@ func (this *FormulaGraph) initActionGraph() {
 			case formula.FORMULA_DRAW_ACTION_DRAWTEXT:
 			case formula.FORMULA_DRAW_ACTION_DRAWICON:
 			case formula.FORMULA_DRAW_ACTION_DRAWLINE:
+				graph = drawlinegraph.NewDrawLineGraph(this.Model, drawAction.(formula.DrawLine), color, this.Scene, this.xTransformer)
 			case formula.FORMULA_DRAW_ACTION_STICKLINE:
 			case formula.FORMULA_DRAW_ACTION_PLOYLINE:
 				graph = ploylinegraph.NewPloyLineGraph(this.Model, drawAction.(formula.PloyLine), color, this.Scene, this.xTransformer)
