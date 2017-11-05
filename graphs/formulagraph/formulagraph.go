@@ -21,6 +21,7 @@ import (
 	"github.com/stephenlyu/tview/graphs/drawlinegraph"
 	"github.com/stephenlyu/tview/graphs/sticklinegraph"
 	"github.com/stephenlyu/tview/graphs/drawtextgraph"
+	"github.com/stephenlyu/tview/graphs/drawicongraph"
 )
 
 type FormulaGraph struct {
@@ -104,6 +105,7 @@ func (this *FormulaGraph) initActionGraph() {
 			case formula.FORMULA_DRAW_ACTION_DRAWTEXT:
 				graph = drawtextgraph.NewDrawTextGraph(this.Model, drawAction.(formula.DrawText), color, this.Scene, this.xTransformer)
 			case formula.FORMULA_DRAW_ACTION_DRAWICON:
+				graph = drawicongraph.NewDrawIconGraph(this.Model, drawAction.(formula.DrawIcon), color, this.Scene, this.xTransformer)
 			case formula.FORMULA_DRAW_ACTION_DRAWLINE:
 				graph = drawlinegraph.NewDrawLineGraph(this.Model, drawAction.(formula.DrawLine), color, this.Scene, this.xTransformer)
 			case formula.FORMULA_DRAW_ACTION_STICKLINE:

@@ -1,0 +1,45 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="0.png">images/DRAWICON_0.png</file>
+    <file alias="1.png">images/DRAWICON_1.png</file>
+    <file alias="2.png">images/DRAWICON_2.png</file>
+    <file alias="3.png">images/DRAWICON_3.png</file>
+    <file alias="4.png">images/DRAWICON_4.png</file>
+    <file alias="5.png">images/DRAWICON_5.png</file>
+    <file alias="6.png">images/DRAWICON_6.png</file>
+    <file alias="7.png">images/DRAWICON_7.png</file>
+    <file alias="8.png">images/DRAWICON_8.png</file>
+    <file alias="9.png">images/DRAWICON_9.png</file>
+    <file alias="10.png">images/DRAWICON_10.png</file>
+    <file alias="11.png">images/DRAWICON_11.png</file>
+    <file alias="12.png">images/DRAWICON_12.png</file>
+    <file alias="13.png">images/DRAWICON_13.png</file>
+    <file alias="14.png">images/DRAWICON_14.png</file>
+    <file alias="15.png">images/DRAWICON_15.png</file>
+    <file alias="16.png">images/DRAWICON_16.png</file>
+    <file alias="17.png">images/DRAWICON_17.png</file>
+    <file alias="18.png">images/DRAWICON_18.png</file>
+    <file alias="19.png">images/DRAWICON_19.png</file>
+    <file alias="20.png">images/DRAWICON_20.png</file>
+    <file alias="21.png">images/DRAWICON_21.png</file>
+    <file alias="22.png">images/DRAWICON_22.png</file>
+    <file alias="23.png">images/DRAWICON_23.png</file>
+    <file alias="24.png">images/DRAWICON_24.png</file>
+    <file alias="25.png">images/DRAWICON_25.png</file>
+    <file alias="26.png">images/DRAWICON_26.png</file>
+    <file alias="27.png">images/DRAWICON_27.png</file>
+    <file alias="28.png">images/DRAWICON_28.png</file>
+    <file alias="29.png">images/DRAWICON_29.png</file>
+    <file alias="30.png">images/DRAWICON_30.png</file>
+    <file alias="31.png">images/DRAWICON_31.png</file>
+    <file alias="32.png">images/DRAWICON_32.png</file>
+    <file alias="33.png">images/DRAWICON_33.png</file>
+    <file alias="34.png">images/DRAWICON_34.png</file>
+    <file alias="35.png">images/DRAWICON_35.png</file>
+    <file alias="36.png">images/DRAWICON_36.png</file>
+    <file alias="37.png">images/DRAWICON_37.png</file>
+    <file alias="38.png">images/DRAWICON_38.png</file>
+    <file alias="39.png">images/DRAWICON_39.png</file>
+    <file alias="40.png">images/DRAWICON_40.png</file>
+  </qresource>
+</RCC>
