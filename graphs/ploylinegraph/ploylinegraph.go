@@ -1,21 +1,20 @@
-package linegraph
+package ploylinegraph
 
 import (
 	"github.com/stephenlyu/tview/model"
 	"github.com/stephenlyu/tds/util"
 	"github.com/stephenlyu/tview/transform"
 	"github.com/therecipe/qt/widgets"
-	"github.com/stephenlyu/tview/constants"
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/goformula/function"
 	"github.com/therecipe/qt/core"
 	"github.com/stephenlyu/tview/graphs"
-	"fmt"
+	"github.com/stephenlyu/goformula/stockfunc/formula"
 )
 
-type LineGraph struct {
+type PloyLineGraph struct {
 	Model model.Model
-	ValueIndex int
+	DrawAction formula.PloyLine
 	Scene *widgets.QGraphicsScene
 	xTransformer transform.ScaleTransformer
 
@@ -24,14 +23,12 @@ type LineGraph struct {
 	PathItem *widgets.QGraphicsPathItem
 }
 
-func NewLineGraph(model model.Model, valueIndex int, color *gui.QColor, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *LineGraph {
+func NewPloyLineGraph(model model.Model, DrawAction formula.PloyLine, color *gui.QColor, scene *widgets.QGraphicsScene, xTransformer transform.ScaleTransformer) *PloyLineGraph {
 	util.Assert(model != nil, "model != nil")
-	util.Assert(model.VarCount() > valueIndex, "len(model.GetGraphTypes()) > valueIndex")
-	util.Assert(model.GraphType(valueIndex) == constants.GraphTypeLine, "model.GetGraphTypes()[valueIndex] == constants.GraphTypeLine")
 
-	this := &LineGraph{
+	this := &PloyLineGraph{
 		Model: model,
-		ValueIndex: valueIndex,
+		DrawAction: DrawAction,
 		Scene: scene,
 		xTransformer: xTransformer,
 		color: color,
@@ -40,15 +37,15 @@ func NewLineGraph(model model.Model, valueIndex int, color *gui.QColor, scene *w
 	return this
 }
 
-func (this *LineGraph) init() {
+func (this *PloyLineGraph) init() {
 	this.Model.AddListener(this)
 }
 
-func (this *LineGraph) OnDataChanged() {
+func (this *PloyLineGraph) OnDataChanged() {
 	this.buildLine()
 }
 
-func (this *LineGraph) OnLastDataChanged() {
+func (this *PloyLineGraph) OnLastDataChanged() {
 	if this.Model.Count() <= 0 {
 		return
 	}
@@ -56,7 +53,7 @@ func (this *LineGraph) OnLastDataChanged() {
 	this.buildLine()
 }
 
-func (this *LineGraph) GetValueRange(startIndex int, endIndex int) (float64, float64) {
+func (this *PloyLineGraph) GetValueRange(startIndex int, endIndex int) (float64, float64) {
 	if this.Model.Count() == 0 {
 		return 0, 0
 	}
@@ -71,15 +68,13 @@ func (this *LineGraph) GetValueRange(startIndex int, endIndex int) (float64, flo
 
 	startIndex, endIndex = this.adjustIndices(startIndex, endIndex)
 
-	values := this.Model.GetRaw(startIndex)
-	util.Assert(len(values) > this.ValueIndex, "len(values) > this.ValueIndex")
+	value := this.Model.TransformRaw(this.DrawAction.GetPrice(startIndex))
 
-	high := values[this.ValueIndex]
-	low := values[this.ValueIndex]
+	high := value
+	low := value
 
 	for i := startIndex + 1; i < endIndex; i++ {
-		values := this.Model.GetRaw(i)
-		v := values[this.ValueIndex]
+		v := this.Model.TransformRaw(this.DrawAction.GetPrice(i))
 		if v > high {
 			high = v
 		}
@@ -91,7 +86,7 @@ func (this *LineGraph) GetValueRange(startIndex int, endIndex int) (float64, flo
 	return low, high
 }
 
-func (this *LineGraph) buildLine() {
+func (this *PloyLineGraph) buildLine() {
 	this.Clear()
 
 	if this.Model.Count() == 0 {
@@ -103,11 +98,16 @@ func (this *LineGraph) buildLine() {
 	needMove := true
 	for i := this.startIndex; i < this.endIndex; i++ {
 		x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 1))) / 2
-		values := this.Model.Get(i)
-		v := values[this.ValueIndex]
+		v := this.Model.Transform(this.DrawAction.GetPrice(i))
+
+		cond := this.DrawAction.GetCond(i)
 
 		if function.IsNaN(v) {
 			needMove = true
+			continue
+		}
+
+		if cond == 0 {
 			continue
 		}
 
@@ -121,13 +121,12 @@ func (this *LineGraph) buildLine() {
 
 	brush := gui.NewQBrush3(this.color, core.Qt__NoBrush)
 	pen := gui.NewQPen3(this.color)
-	graphs.SetPenStyle(pen, this.Model.LineStyle(this.ValueIndex))
-	graphs.SetPenWidth(pen, this.xTransformer, this.Model.LineThick(this.ValueIndex))
+	graphs.SetPenWidth(pen, this.xTransformer, this.DrawAction.GetLineThick())
 
 	this.PathItem = this.Scene.AddPath(path, pen, brush)
 }
 
-func (this *LineGraph) adjustIndices(startIndex int, endIndex int) (int, int) {
+func (this *PloyLineGraph) adjustIndices(startIndex int, endIndex int) (int, int) {
 	if startIndex > 0 {
 		startIndex--
 	}
@@ -138,8 +137,8 @@ func (this *LineGraph) adjustIndices(startIndex int, endIndex int) (int, int) {
 }
 
 // 更新当前显示的K线
-func (this *LineGraph) Update(startIndex int, endIndex int) {
-	if this.Model.NoDraw(this.ValueIndex) {
+func (this *PloyLineGraph) Update(startIndex int, endIndex int) {
+	if this.DrawAction.IsNoDraw() {
 		return
 	}
 	if startIndex < 0 {
@@ -159,8 +158,8 @@ func (this *LineGraph) Update(startIndex int, endIndex int) {
 }
 
 // 清除所有的K线
-func (this *LineGraph) Clear() {
-	if this.Model.NoDraw(this.ValueIndex) {
+func (this *PloyLineGraph) Clear() {
+	if this.DrawAction.IsNoDraw() {
 		return
 	}
 	if this.PathItem != nil {
@@ -169,16 +168,5 @@ func (this *LineGraph) Clear() {
 	}
 }
 
-func (this *LineGraph) ShowInfo(index int, display graphs.InfoDisplay) {
-	if this.Model.NoText(this.ValueIndex) {
-		return
-	}
-	if index < 0 || index >= this.Model.Count() {
-		return
-	}
-
-	name := this.Model.GetNames()[this.ValueIndex]
-	v := this.Model.GetRaw(index)[this.ValueIndex]
-
-	display.Add(fmt.Sprintf("%s: %s", name, graphs.FormatValue(v, 2)), this.color)
+func (this *PloyLineGraph) ShowInfo(index int, display graphs.InfoDisplay) {
 }

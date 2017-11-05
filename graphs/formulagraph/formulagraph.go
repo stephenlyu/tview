@@ -16,6 +16,8 @@ import (
 	"github.com/stephenlyu/tview/graphs/linestickgraph"
 	"github.com/stephenlyu/goformula/stockfunc/formula"
 	"github.com/stephenlyu/tview/graphs/klinegraph"
+	"github.com/stephenlyu/tview/graphs/ploylinegraph"
+	"fmt"
 )
 
 type FormulaGraph struct {
@@ -75,31 +77,34 @@ func (this *FormulaGraph) initNormalGraph() {
 
 func (this *FormulaGraph) initActionGraph() {
 	this.actionGraphs = make([]graphs.Graph, this.Model.DrawActionCount())
-	//j := 0
-	//var color *gui.QColor
+	j := 0
+	var color *gui.QColor
 
 	for i := 0; i < this.Model.DrawActionCount(); i++ {
 		drawAction := this.Model.DrawAction(i)
 
 		var graph graphs.Graph
-		//fColor := drawAction.GetColor()
-		//if fColor != nil {
-		//	color = gui.NewQColor3(fColor.Red, fColor.Green, fColor.Blue, 255)
-		//} else if drawAction.GetVarIndex() != - 1 {
-		//	color = graphs.COLORS[drawAction.GetVarIndex() % len(graphs.COLORS)]
-		//} else {
-		//	color = graphs.COLORS[j % len(graphs.COLORS)]
-		//	j++
-		//}
+		fColor := drawAction.GetColor()
+		if fColor != nil {
+			color = gui.NewQColor3(fColor.Red, fColor.Green, fColor.Blue, 255)
+		} else if drawAction.GetVarIndex() != - 1 {
+			color = graphs.COLORS[drawAction.GetVarIndex() % len(graphs.COLORS)]
+		} else {
+			color = graphs.COLORS[j % len(graphs.COLORS)]
+			j++
+		}
 
-		switch drawAction.GetActionType() {
-		case formula.FORMULA_DRAW_ACTION_DRAWKLINE:
-			graph = klinegraph.NewDrawKLineGraph(this.Model, drawAction.(formula.DrawKLine), this.Scene, this.xTransformer)
-		case formula.FORMULA_DRAW_ACTION_DRAWTEXT:
-		case formula.FORMULA_DRAW_ACTION_DRAWICON:
-		case formula.FORMULA_DRAW_ACTION_DRAWLINE:
-		case formula.FORMULA_DRAW_ACTION_STICKLINE:
-		case formula.FORMULA_DRAW_ACTION_PLOYLINE:
+		if !drawAction.IsNoDraw() {
+			switch drawAction.GetActionType() {
+			case formula.FORMULA_DRAW_ACTION_DRAWKLINE:
+				graph = klinegraph.NewDrawKLineGraph(this.Model, drawAction.(formula.DrawKLine), this.Scene, this.xTransformer)
+			case formula.FORMULA_DRAW_ACTION_DRAWTEXT:
+			case formula.FORMULA_DRAW_ACTION_DRAWICON:
+			case formula.FORMULA_DRAW_ACTION_DRAWLINE:
+			case formula.FORMULA_DRAW_ACTION_STICKLINE:
+			case formula.FORMULA_DRAW_ACTION_PLOYLINE:
+				graph = ploylinegraph.NewPloyLineGraph(this.Model, drawAction.(formula.PloyLine), color, this.Scene, this.xTransformer)
+			}
 		}
 		this.actionGraphs[i] = graph
 	}
@@ -202,11 +207,35 @@ func (this *FormulaGraph) Clear() {
 	}
 }
 
+func (this *FormulaGraph) ShowSubInfo(valueIndex int, index int, display graphs.InfoDisplay) {
+	if this.Model.NoText(valueIndex) {
+		return
+	}
+	if index < 0 || index >= this.Model.Count() {
+		return
+	}
+
+	j := 0
+	var color *gui.QColor
+	fColor := this.Model.Color(valueIndex)
+	if fColor != nil {
+		color = gui.NewQColor3(fColor.Red, fColor.Green, fColor.Blue, 255)
+	} else {
+		color = graphs.COLORS[j % len(graphs.COLORS)]
+		j++
+	}
+
+	name := this.Model.GetNames()[valueIndex]
+	v := this.Model.GetRaw(index)[valueIndex]
+	display.Add(fmt.Sprintf("%s: %s", name, graphs.FormatValue(v, 2)), color)
+}
+
 func (this *FormulaGraph) ShowInfo(index int, display graphs.InfoDisplay) {
 	formulaModel := this.Model.(*model.FormulaModel)
 	display.Add(formulaModel.Formula.Name(), gui.NewQColor3(255, 255, 255, 255))
-	for _, graph := range this.normalGraphs {
+	for i, graph := range this.normalGraphs {
 		if graph == nil {
+			this.ShowSubInfo(i, index, display)
 			continue
 		}
 		graph.ShowInfo(index, display)

@@ -6,7 +6,7 @@ import (
 	"github.com/stephenlyu/goformula/stockfunc"
 )
 
-var formulaFactory = stockfunc.NewFormulaFactory(false)
+var formulaFactory = stockfunc.NewFormulaFactory(true)
 
 type FormulaCreator interface {
 	CreateFormula(data *Data) (error, formula.Formula)

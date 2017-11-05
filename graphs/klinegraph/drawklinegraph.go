@@ -121,6 +121,9 @@ func (this *DrawKLineGraph) adjustIndices(startIndex int, endIndex int) (int, in
 
 // 更新当前显示的K线
 func (this *DrawKLineGraph) Update(startIndex int, endIndex int) {
+	if this.DrawAction.IsNoDraw() {
+		return
+	}
 	if startIndex < 0 {
 		startIndex = 0
 	}
@@ -148,6 +151,9 @@ func (this *DrawKLineGraph) Update(startIndex int, endIndex int) {
 
 // 清除所有的K线
 func (this *DrawKLineGraph) Clear() {
+	if this.DrawAction.IsNoDraw() {
+		return
+	}
 	for _, item := range this.KLines {
 		this.Scene.RemoveItem(item.Item)
 	}

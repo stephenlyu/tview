@@ -5,6 +5,8 @@ import (
 	"github.com/stephenlyu/tview/transform"
 	"github.com/stephenlyu/goformula/stockfunc/formula"
 	"github.com/therecipe/qt/core"
+	"math"
+	"fmt"
 )
 
 type InfoDisplay interface {
@@ -47,5 +49,22 @@ func SetPenStyle(pen *gui.QPen, style int) {
 		pen.SetStyle(core.Qt__DashDotDotLine)
 	case formula.FORMULA_LINE_STYLE_SOLID:
 		pen.SetStyle(core.Qt__SolidLine)
+	}
+}
+
+func FormatValue(v float64, bits int) string {
+	if math.IsNaN(v) {
+		return "-"
+	}
+
+	switch bits {
+	case 1:
+		return fmt.Sprintf("%.1f", v)
+	case 2:
+		return fmt.Sprintf("%.2f", v)
+	case 3:
+		return fmt.Sprintf("%.3f", v)
+	default:
+		return fmt.Sprintf("%.0f", v)
 	}
 }

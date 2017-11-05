@@ -201,5 +201,5 @@ func (this *VolStickGraph) ShowInfo(index int, display graphs.InfoDisplay) {
 
 	name := this.Model.GetNames()[this.ValueIndex]
 	v := this.Model.GetRaw(index)[this.ValueIndex]
-	display.Add(fmt.Sprintf("%s: %.0f", name, v), this.Color)
+	display.Add(fmt.Sprintf("%s: %s", name, graphs.FormatValue(v, 0)), this.Color)
 }
