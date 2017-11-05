@@ -25,6 +25,8 @@ func getLineWidth(xTransformer transform.ScaleTransformer, lineThick int) int {
 	width := maxWidth * float64(lineThick) / 9
 	if width < 1.0 {
 		width = 1.0
+	} else if width > float64(lineThick) {
+		width = float64(lineThick)
 	}
 	return int(width)
 }
