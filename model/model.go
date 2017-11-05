@@ -17,6 +17,7 @@ type Model interface {
 	GetNames() []string
 
 	VarCount() int
+	DrawActionCount() int 						// DrawAction数量
 	NoDraw(index int) bool 						// 是否绘制图形
 	NoText(index int) bool 						// 是否绘制文本
 	DrawAbove(index int) bool
@@ -25,9 +26,13 @@ type Model interface {
 	LineThick(index int) int 					// 线宽，1-9
 	LineStyle(index int) int 					// 线宽，1-9
 	GraphType(index int) int
+	DrawAction(index int) formula.DrawAction
 
 	SetValueTransformer(transformer transform.Transformer)
 	SetScaleTransformer(transformer transform.ScaleTransformer)
+
+	TransformRaw(v float64) float64
+	Transform(v float64) float64
 
 	AddListener(listener ModelListener)
 	RemoveListener(listener ModelListener)

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/stephenlyu/tview/transform"
+	"github.com/stephenlyu/goformula/stockfunc/formula"
 )
 
 type BaseModel struct {
@@ -31,12 +32,36 @@ func (this *BaseModel) GetGraphTypes() []int {
 	return nil
 }
 
+func (this *KLineModel) DrawActionCount() int {
+	return 0
+}
+
+func (this *BaseModel) DrawAction(index int) formula.DrawAction {
+	panic("Unimplemented")
+	return nil
+}
+
 func (this *BaseModel) SetValueTransformer(transformer transform.Transformer) {
 	this.valueTransformer = transformer
 }
 
 func (this *BaseModel) SetScaleTransformer(transformer transform.ScaleTransformer) {
 	this.scaleTransformer = transformer
+}
+
+func (this *BaseModel) TransformRaw(v float64) float64 {
+	if this.valueTransformer != nil {
+		v = this.valueTransformer.To(v)
+	}
+	return v
+}
+
+func (this *BaseModel) Transform(v float64) float64 {
+	v = this.TransformRaw(v)
+	if this.scaleTransformer != nil {
+		v = this.scaleTransformer.To(v)
+	}
+	return v
 }
 
 func (this *BaseModel) AddListener(listener ModelListener) {

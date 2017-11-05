@@ -53,3 +53,35 @@ func (this *KLineItem) Update(x float64, w float64, open float64, close float64,
 
 	this.Item.SetPath(path)
 }
+
+func (this *KLineItem) Update1(x float64, w float64, open float64, close float64, high float64, low float64) {
+	this.Item.SetPos2(x + w / 2, (high + low) / 2)
+
+	kWidth := w * 2.0 / 3
+
+	maxY := (high - low) / 2
+
+	path := gui.NewQPainterPath()
+	path.MoveTo2(0, -maxY)
+	path.LineTo2(0, maxY)
+
+	// 画开盘价
+	openY := (open - low) - maxY
+	path.MoveTo2(-kWidth / 2, openY)
+	path.LineTo2(0, openY)
+
+	// 画收盘价
+	closeY := (close - low) - maxY
+	path.MoveTo2(0, closeY)
+	path.LineTo2(kWidth / 2, closeY)
+
+	if close > open {
+		this.Item.SetPen(gui.NewQPen3(graphs.PositiveColor))
+	} else if close == open {
+		this.Item.SetPen(gui.NewQPen3(graphs.WhiteColor))
+	} else {
+		this.Item.SetPen(gui.NewQPen3(graphs.NegativeColor))
+	}
+
+	this.Item.SetPath(path)
+}

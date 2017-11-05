@@ -6,13 +6,14 @@ import (
 )
 
 const (
+	GraphTypeNone = formula.FORMULA_GRAPH_NONE							// No graph, consume 1 value
 	GraphTypeLine = formula.FORMULA_GRAPH_LINE							// Line graph, consume 1 value
-	GraphTypeColorStick = formula.FORMULA_GRAPH_COLOR_STICK             // Line graph, consume 1 value
-	GraphTypeStick = formula.FORMULA_GRAPH_STICK             			// Line graph, consume 1 value
-	GraphTypeLineStick = formula.FORMULA_GRAPH_LINE_STICK             	// Line graph, consume 1 value
-	GraphTypeVolStick = formula.FORMULA_GRAPH_VOL_STICK           		// Line graph, consume 1 value
+	GraphTypeColorStick = formula.FORMULA_GRAPH_COLOR_STICK             // Color stick graph, consume 1 value
+	GraphTypeStick = formula.FORMULA_GRAPH_STICK             			// Stick graph, consume 1 value
+	GraphTypeLineStick = formula.FORMULA_GRAPH_LINE_STICK             	// Line stick graph, consume 1 value
+	GraphTypeVolStick = formula.FORMULA_GRAPH_VOL_STICK           		// Vol stick graph, consume 1 value
 
-	GraphTypeKLine = 99
+	GraphTypeKLine = 99													// KLine graph, consume 4 values
 )
 
 

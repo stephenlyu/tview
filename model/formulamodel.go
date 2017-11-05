@@ -76,6 +76,17 @@ func (this *FormulaModel) VarCount() int {
 	return this.Formula.VarCount()
 }
 
+func (this *FormulaModel) DrawActionCount() int {
+	return len(this.Formula.DrawActions())
+}
+
+func (this *FormulaModel) DrawAction(index int) formula.DrawAction {
+	if index < 0 || index >= this.DrawActionCount() {
+		panic("bad draw action index")
+	}
+	return this.Formula.DrawActions()[index]
+}
+
 func (this *FormulaModel) NoDraw(index int) bool {
 	return this.Formula.NoDraw(index)
 }
