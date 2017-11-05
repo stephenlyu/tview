@@ -24,6 +24,7 @@ func main() {
 	trans := gui.QTransform_FromScale(1.0, -1.0)
 
 	ti := scene.AddText("Hello", w.Font())
+
 	ti.SetTransform(trans, false)
 	scene.AddRect(ti.BoundingRect(), pen, gui.NewQBrush2(core.Qt__NoBrush))
 

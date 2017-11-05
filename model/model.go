@@ -34,6 +34,9 @@ type Model interface {
 	TransformRaw(v float64) float64
 	Transform(v float64) float64
 
+	TransformRawFrom(v float64) float64
+	TransformFrom(v float64) float64
+
 	AddListener(listener ModelListener)
 	RemoveListener(listener ModelListener)
 

@@ -64,6 +64,21 @@ func (this *BaseModel) Transform(v float64) float64 {
 	return v
 }
 
+func (this *BaseModel) TransformRawFrom(v float64) float64 {
+	v = this.TransformFrom(v)
+	if this.valueTransformer != nil {
+		v = this.valueTransformer.From(v)
+	}
+	return v
+}
+
+func (this *BaseModel) TransformFrom(v float64) float64 {
+	if this.scaleTransformer != nil {
+		v = this.scaleTransformer.From(v)
+	}
+	return v
+}
+
 func (this *BaseModel) AddListener(listener ModelListener) {
 	for _, l := range this.listeners {
 		if l == listener {
