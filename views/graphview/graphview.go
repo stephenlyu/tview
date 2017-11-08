@@ -18,6 +18,9 @@ import (
 	"github.com/stephenlyu/tview/graphs/selectrect"
 	"github.com/stephenlyu/tview/graphs/separatorgraph"
 	"github.com/stephenlyu/tds/period"
+	"github.com/stephenlyu/goformula/formulalibrary"
+	"github.com/stephenlyu/goformula/stockfunc/function"
+	"github.com/stephenlyu/goformula/formulalibrary/base/factory"
 )
 
 const (
@@ -66,7 +69,7 @@ type GraphView struct {
 
 	// Formula creators
 
-	FormulaCreators map[string]model.FormulaCreator
+	FormulaCreators map[string]factory.FormulaCreator
 
 	// Graphs
 
@@ -107,7 +110,7 @@ func CreateGraphView(isMain bool, decorator *GraphViewDecorator, parent widgets.
 	this.Models = make(map[string]model.Model)
 	this.SeparatorModel = model.NewSeparatorModel()
 	this.Graphs = make(map[string]graphs.Graph)
-	this.FormulaCreators = make(map[string]model.FormulaCreator)
+	this.FormulaCreators = make(map[string]factory.FormulaCreator)
 	this.init()
 
 	this.ValueTransformer = transform.NewEQTransformer()
@@ -216,14 +219,14 @@ func (this *GraphView) RemoveFormula(name string) {
 }
 
 func (this *GraphView) AddFormula(name string, args []float64) {
-	if !model.GlobalLibrary.CanSupport(name) {
+	if !formulalibrary.GlobalLibrary.CanSupport(name) {
 		log.Errorf("formula %s not supported", name)
 		return
 	}
 
 	this.RemoveFormula(name)
 
-	creatorFactory := model.GlobalLibrary.GetCreatorFactory(name)
+	creatorFactory := formulalibrary.GlobalLibrary.GetCreatorFactory(name)
 
 	creator := creatorFactory.CreateFormulaCreator(args)
 
@@ -238,7 +241,7 @@ func (this *GraphView) AddFormula(name string, args []float64) {
 func (this *GraphView) createFormulaGraph(name string) {
 	creator := this.FormulaCreators[name]
 
-	_, formula := creator.CreateFormula(this.Data)
+	_, formula := creator.CreateFormula(function.RecordVector(this.Data.Records()))
 	model := model.NewFormulaModel(formula)
 	this.setModelTransformers(model)
 	this.Models[name] = model

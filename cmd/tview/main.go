@@ -11,22 +11,23 @@ import (
 	"github.com/stephenlyu/tds/entity"
 	"github.com/stephenlyu/tds/period"
 	"github.com/Sirupsen/logrus"
-	"github.com/stephenlyu/tview/model"
 	"path/filepath"
 	"github.com/z-ray/log"
 	"runtime"
 	"bytes"
+	"github.com/stephenlyu/goformula/formulalibrary"
 )
 
 const DATA_DIR = "data"
 const FORMULA_DIR = "formulas"
+const DEBUG = true
 
 func initFormulaLibrary() {
 	formulaDir := FindDir(FORMULA_DIR)
-	model.GlobalLibrary.Register("MA", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "MA.d")))
-	model.GlobalLibrary.Register("MACD", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "MACD.d")))
-	model.GlobalLibrary.Register("VOL", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "VOL.d")))
-	model.GlobalLibrary.Register("CLOSE", model.NewEasyLangFormulaCreatorFactory(filepath.Join(formulaDir, "CLOSE.d")))
+	formulalibrary.GlobalLibrary.RegisterEasyLangFile("MA", filepath.Join(formulaDir, "MA.d"), DEBUG)
+	formulalibrary.GlobalLibrary.RegisterEasyLangFile("MACD", filepath.Join(formulaDir, "MACD.d"), DEBUG)
+	formulalibrary.GlobalLibrary.RegisterEasyLangFile("VOL", filepath.Join(formulaDir, "VOL.d"), DEBUG)
+	formulalibrary.GlobalLibrary.RegisterEasyLangFile("CLOSE", filepath.Join(formulaDir, "CLOSE.d"), DEBUG)
 }
 
 func FindDir(dirName string) string {

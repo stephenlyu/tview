@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/stephenlyu/goformula/stockfunc/formula"
 )
+import "github.com/stephenlyu/goformula/formulalibrary/base/formula"
 
 type FormulaModel struct {
 	BaseModel

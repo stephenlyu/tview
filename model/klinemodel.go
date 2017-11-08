@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/stephenlyu/tview/constants"
-	"github.com/stephenlyu/goformula/stockfunc/formula"
+	"github.com/stephenlyu/goformula/formulalibrary/base/formula"
 )
 
 type KLineModel struct {

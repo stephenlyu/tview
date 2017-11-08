@@ -3,10 +3,10 @@ package graphs
 import (
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/tview/transform"
-	"github.com/stephenlyu/goformula/stockfunc/formula"
 	"github.com/therecipe/qt/core"
 	"math"
 	"fmt"
+	"github.com/stephenlyu/goformula/formulalibrary/base/formula"
 )
 
 type InfoDisplay interface {

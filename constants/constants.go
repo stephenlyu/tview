@@ -2,8 +2,9 @@ package constants
 
 import (
 	"github.com/therecipe/qt/gui"
-	"github.com/stephenlyu/goformula/stockfunc/formula"
+	"github.com/stephenlyu/goformula/formulalibrary/base/formula"
 )
+
 
 const (
 	GraphTypeNone = formula.FORMULA_GRAPH_NONE							// No graph, consume 1 value

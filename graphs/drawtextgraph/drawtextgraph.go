@@ -7,8 +7,8 @@ import (
 	"github.com/therecipe/qt/widgets"
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/tview/graphs"
-	"github.com/stephenlyu/goformula/stockfunc/formula"
 	"github.com/stephenlyu/goformula/function"
+	"github.com/stephenlyu/goformula/formulalibrary/base/formula"
 )
 
 type DrawTextGraph struct {

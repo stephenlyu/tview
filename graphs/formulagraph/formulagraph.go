@@ -14,7 +14,6 @@ import (
 	"math"
 	"github.com/stephenlyu/tview/graphs/stickgraph"
 	"github.com/stephenlyu/tview/graphs/linestickgraph"
-	"github.com/stephenlyu/goformula/stockfunc/formula"
 	"github.com/stephenlyu/tview/graphs/klinegraph"
 	"github.com/stephenlyu/tview/graphs/ploylinegraph"
 	"fmt"
@@ -22,6 +21,7 @@ import (
 	"github.com/stephenlyu/tview/graphs/sticklinegraph"
 	"github.com/stephenlyu/tview/graphs/drawtextgraph"
 	"github.com/stephenlyu/tview/graphs/drawicongraph"
+	"github.com/stephenlyu/goformula/formulalibrary/base/formula"
 )
 
 type FormulaGraph struct {

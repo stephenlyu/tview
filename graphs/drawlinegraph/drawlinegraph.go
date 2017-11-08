@@ -9,8 +9,8 @@ import (
 	"github.com/stephenlyu/goformula/function"
 	"github.com/therecipe/qt/core"
 	"github.com/stephenlyu/tview/graphs"
-	"github.com/stephenlyu/goformula/stockfunc/formula"
 	"math"
+	"github.com/stephenlyu/goformula/formulalibrary/base/formula"
 )
 
 type DrawLineGraph struct {

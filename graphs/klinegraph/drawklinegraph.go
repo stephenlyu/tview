@@ -6,7 +6,7 @@ import (
 	"github.com/stephenlyu/tview/transform"
 	"github.com/therecipe/qt/widgets"
 	"github.com/stephenlyu/tview/graphs"
-	"github.com/stephenlyu/goformula/stockfunc/formula"
+	"github.com/stephenlyu/goformula/formulalibrary/base/formula"
 )
 
 type DrawKLineGraph struct {
