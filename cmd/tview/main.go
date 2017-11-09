@@ -22,12 +22,12 @@ const DATA_DIR = "data"
 const FORMULA_DIR = "formulas"
 const DEBUG = true
 
+var library = formulalibrary.GlobalLibrary
+
 func initFormulaLibrary() {
 	formulaDir := FindDir(FORMULA_DIR)
-	formulalibrary.GlobalLibrary.RegisterEasyLangFile("MA", filepath.Join(formulaDir, "MA.d"), DEBUG)
-	formulalibrary.GlobalLibrary.RegisterEasyLangFile("MACD", filepath.Join(formulaDir, "MACD.d"), DEBUG)
-	formulalibrary.GlobalLibrary.RegisterEasyLangFile("VOL", filepath.Join(formulaDir, "VOL.d"), DEBUG)
-	formulalibrary.GlobalLibrary.RegisterEasyLangFile("CLOSE", filepath.Join(formulaDir, "CLOSE.d"), DEBUG)
+	library.SetDebug(DEBUG)
+	library.LoadEasyLangFormulas(formulaDir)
 }
 
 func FindDir(dirName string) string {
