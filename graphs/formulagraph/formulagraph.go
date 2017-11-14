@@ -240,7 +240,7 @@ func (this *FormulaGraph) ShowSubInfo(valueIndex int, index int, display graphs.
 
 func (this *FormulaGraph) ShowInfo(index int, display graphs.InfoDisplay) {
 	formulaModel := this.Model.(*model.FormulaModel)
-	display.Add(formulaModel.Formula.Name(), gui.NewQColor3(255, 255, 255, 255))
+	display.Add(formulaModel.Formula.GetName(), gui.NewQColor3(255, 255, 255, 255))
 	for i, graph := range this.normalGraphs {
 		if graph == nil {
 			this.ShowSubInfo(i, index, display)

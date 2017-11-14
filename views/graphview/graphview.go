@@ -241,7 +241,7 @@ func (this *GraphView) AddFormula(name string, args []float64) {
 func (this *GraphView) createFormulaGraph(name string) {
 	creator := this.FormulaCreators[name]
 
-	_, formula := creator.CreateFormula(function.RecordVector(this.Data.Records()))
+	_, formula := creator.CreateFormula(function.RecordVectorEx("", this.Period, this.Data.Records()))
 	model := model.NewFormulaModel(formula)
 	this.setModelTransformers(model)
 	this.Models[name] = model
