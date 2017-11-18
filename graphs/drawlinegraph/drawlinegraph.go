@@ -102,34 +102,44 @@ func (this *DrawLineGraph) buildLine() {
 
 	path := gui.NewQPainterPath()
 
-	var prevX, prevY float64
+	var prevCond1X, prevCond1Y float64
+	var prevCond2X, prevCond2Y float64
 
-	prevX = -1
+	prevCond1X = -1
+	prevCond2X = -1
 
 	for i := this.startIndex; i < this.endIndex; i++ {
 		x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 1))) / 2
 		value1 := this.Model.Transform(this.DrawAction.GetPrice1(i))
 
 		cond1 := this.DrawAction.GetCond1(i)
-		if cond1 != 0 {
-			prevX = x
-			prevY = value1
+		if function.IsTrue(cond1) {
+			if prevCond2X > prevCond1X && !function.IsNaN(prevCond2Y) {
+				path.MoveTo2(prevCond1X, prevCond1Y)
+				path.LineTo2(prevCond2X, prevCond2Y)
+				prevCond2X = -1
+			}
+
+			prevCond1X = x
+			prevCond1Y = value1
 			continue
 		}
 
-		if prevX < 0 || function.IsNaN(prevY) {
+		if prevCond1X < 0 || function.IsNaN(prevCond1Y) {
 			continue
 		}
-
 
 		cond2 := this.DrawAction.GetCond2(i)
 		value2 := this.Model.Transform(this.DrawAction.GetPrice2(i))
-		if cond2 != 0 {
-			if !function.IsNaN(value2) {
-				path.MoveTo2(prevX, prevY)
-				path.LineTo2(x, value2)
-			}
+		if function.IsTrue(cond2) {
+			prevCond2X = x
+			prevCond2Y = value2
 		}
+	}
+	if prevCond2X > prevCond1X && !function.IsNaN(prevCond2Y) {
+		path.MoveTo2(prevCond1X, prevCond1Y)
+		path.LineTo2(prevCond2X, prevCond2Y)
+		prevCond2X = -1
 	}
 
 	brush := gui.NewQBrush3(this.color, core.Qt__NoBrush)
@@ -149,11 +159,11 @@ func (this *DrawLineGraph) adjustIndices(startIndex int, endIndex int) (int, int
 	}
 
 	for endIndex < this.Model.Count() {
-		endIndex++
 		cond2 := this.DrawAction.GetCond2(endIndex)
 		if cond2 != 0 {
 			break
 		}
+		endIndex++
 	}
 
 	return startIndex, endIndex
