@@ -111,12 +111,14 @@ func (this *StickLineGraph) ensureItem(i int) *widgets.QGraphicsPathItem {
 
 func (this *StickLineGraph) updateStick(i int, item *widgets.QGraphicsPathItem) bool {
 	x := (this.xTransformer.To(float64(i)) + this.xTransformer.To(float64(i + 1))) / 2
-	value1 := this.Model.Transform(this.DrawAction.GetPrice1(i))
-	value2 := this.Model.Transform(this.DrawAction.GetPrice2(i))
-
+	value1 := this.DrawAction.GetPrice1(i)
+	value2 := this.DrawAction.GetPrice2(i)
 	if function.IsNaN(value1) || function.IsNaN(value2) {
 		return false
 	}
+
+	value1 = this.Model.Transform(value1)
+	value2 = this.Model.Transform(value2)
 
 	path := gui.NewQPainterPath()
 
