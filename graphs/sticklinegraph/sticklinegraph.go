@@ -103,6 +103,18 @@ func (this *StickLineGraph) ensureItem(i int) *widgets.QGraphicsPathItem {
 	item, ok := this.Lines[i]
 	if !ok {
 		item = widgets.NewQGraphicsPathItem(nil)
+
+		pen := gui.NewQPen3(this.color)
+		unit := this.xTransformer.To(1) * 2 / 3
+		lineWidth := unit * 3 / 4
+		if lineWidth < 1 {
+			lineWidth = 1
+		} else if lineWidth > 6 {
+			lineWidth = 6
+		}
+		pen.SetWidth(int(lineWidth))
+
+		item.SetPen(pen)
 		this.Scene.AddItem(item)
 		this.Lines[i] = item
 	}
@@ -125,10 +137,6 @@ func (this *StickLineGraph) updateStick(i int, item *widgets.QGraphicsPathItem) 
 	path.MoveTo2(x, value1)
 	path.LineTo2(x, value2)
 
-	pen := gui.NewQPen3(this.color)
-	item.SetPen(pen)
-	graphs.SetPenWidth(pen, this.xTransformer, this.DrawAction.GetLineThick())
-
 	item.SetPath(path)
 	return true
 }
@@ -145,6 +153,7 @@ func (this *StickLineGraph) adjustIndices(startIndex int, endIndex int) (int, in
 
 // 更新当前显示的K线
 func (this *StickLineGraph) Update(startIndex int, endIndex int) {
+	this.Clear()
 	if this.DrawAction.IsNoDraw() {
 		return
 	}
