@@ -107,7 +107,7 @@ func (this *PloyLineGraph) buildLine() {
 			continue
 		}
 
-		if cond == 0 {
+		if !function.IsTrue(cond) {
 			continue
 		}
 

@@ -156,7 +156,7 @@ func (this *DrawTextGraph) Update(startIndex int, endIndex int) {
 	// 更新需要显示的K线
 	for i := startIndex; i < endIndex; i++ {
 		cond := this.DrawAction.GetCond(i)
-		if cond == 0 {
+		if !function.IsTrue(cond) {
 			continue
 		}
 
