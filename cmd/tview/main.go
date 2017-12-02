@@ -106,10 +106,11 @@ func main() {
 	w.Widget.Move2(int(float64(rect.Width()) * 0.1), int(float64(rect.Height()) * 0.1))
 	w.Widget.ShowMaximized()
 
-	container.AddGraphFormula(0, "MA", []float64{5, 10, 20, 60})
+	//container.AddGraphFormula(0, "MA", []float64{5, 10, 20, 60})
+	container.AddGraphFormula(0, "EMA513", []float64{5, 13})
 	container.AddGraphFormula(1, "MACD", []float64{12, 26, 9})
 	container.AddGraphFormula(2, "VOL", []float64{5, 10})
-	container.AddGraphFormula(3, "CLOSE", []float64{})
+	container.AddGraphFormula(3, "DDGS", []float64{0.02})
 
 	//container.ShowGraph(2)
 
@@ -119,7 +120,7 @@ func main() {
 		ds := tdxdatasource.NewDataSource(FindDir(DATA_DIR), true)
 		security, _ := entity.ParseSecurity("000001.SZ")
 		_, period := period.PeriodFromString("D1")
-		err, data := ds.GetData(security, period)
+		err, data := ds.GetForwardAdjustedData(security, period)
 		if err != nil {
 			logrus.Fatalf("加载数据失败，错误：%s", err.Error())
 		}

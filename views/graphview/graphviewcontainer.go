@@ -204,15 +204,18 @@ func (this *GraphViewContainer) doZoom(scale float64) {
 		return
 	}
 
+	usableMainWidth := this.graphViews[0].GetUsableWidth()
+
 	var itemWidth float64
 	if scale < 1 {
-		if this.itemWidth <= constants.MIN_ITEM_WIDTH {
+		fCount := float64(len(this.data))
+		if this.itemWidth <= constants.MIN_ITEM_WIDTH && this.itemWidth * fCount <= usableMainWidth {
 			return
 		}
 
 		itemWidth = this.itemWidth * scale
-		if itemWidth < constants.MIN_ITEM_WIDTH {
-			itemWidth = constants.MIN_ITEM_WIDTH
+		if itemWidth < constants.MIN_ITEM_WIDTH && itemWidth * fCount < usableMainWidth {
+			itemWidth = usableMainWidth / fCount
 		}
 	} else {
 		if this.itemWidth >= constants.MAX_ITEM_WIDTH {
