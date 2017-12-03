@@ -9,6 +9,7 @@ import (
 	"github.com/stephenlyu/tview/constants"
 	"fmt"
 	"github.com/stephenlyu/tds/period"
+	"github.com/stephenlyu/tview/views"
 )
 
 const MAX_SECONDARY_GRAPHS = 5
@@ -114,7 +115,7 @@ func (this *GraphViewContainer) init() {
 }
 
 // StackedWidget method
-func (this *GraphViewContainer) SetMainWindow(window *mainwindow.MainWindow) {
+func (this *GraphViewContainer) SetMainWindow(window views.TopWindow) {
 	this.MainWindow = window
 }
 

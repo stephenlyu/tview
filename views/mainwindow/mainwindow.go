@@ -4,12 +4,8 @@ import (
 	"github.com/therecipe/qt/widgets"
 	"github.com/stephenlyu/tview/uigen"
 	"github.com/therecipe/qt/core"
+	"github.com/stephenlyu/tview/views"
 )
-
-type StackedWidget interface {
-	widgets.QWidget_ITF
-	SetMainWindow(window *MainWindow)
-}
 
 type MainWindow struct {
 	uigen.UIMainwindowMainWindow
@@ -39,7 +35,7 @@ func GetMainWindow(parent widgets.QWidget_ITF) *MainWindow {
 	return window
 }
 
-func (this *MainWindow) Push(widget StackedWidget) {
+func (this *MainWindow) Push(widget views.StackedWidget) {
 	if widget == nil {
 		return
 	}
@@ -57,7 +53,7 @@ func (this *MainWindow) Pop() {
 	this.StackWidget.RemoveWidget(lastView)
 
 	var i interface{} = lastView
-	i.(StackedWidget).SetMainWindow(nil)
+	i.(views.StackedWidget).SetMainWindow(nil)
 }
 
 func (this *MainWindow) StackSize() int {
