@@ -4,7 +4,6 @@ import (
 	"github.com/therecipe/qt/widgets"
 	"github.com/therecipe/qt/core"
 	"github.com/stephenlyu/tds/entity"
-	"github.com/stephenlyu/tview/views/mainwindow"
 	"github.com/therecipe/qt/gui"
 	"github.com/stephenlyu/tview/constants"
 	"fmt"
@@ -19,7 +18,7 @@ const DEFAULT_SECONDARY_GRAPHS = 3
 //go:generate qtmoc
 type GraphViewContainer struct {
 	widgets.QWidget
-	MainWindow *mainwindow.MainWindow
+	MainWindow views.TopWindow
 
 	// Children
 	splitter *widgets.QSplitter
